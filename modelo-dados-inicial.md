@@ -1,72 +1,72 @@
-# 01 - Perguntas essenciais para fechar escopo do MVP
+# 02 - Modelo de dados inicial (MVP)
 
-> Status: **respondidas e consolidadas** com base no retorno da área usuária.
+## Tabela: `escolas`
 
-## 1) Fonte de verdade dos dados de atos autorizativos
+- `id` (PK, UUID ou inteiro)
+- `nome_oficial` (texto, obrigatório)
+- `codigo_inep` (texto, opcional, **único**)
+- `cnpj` (texto, opcional, indexado)
+- `municipio` (texto, opcional, indexado)
+- `rede_ensino` (enum/texto: estadual, municipal, privada etc.)
+- `situacao` (enum: ativa, inativa)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
 
-**Decisão:** os dados passarão a ser mantidos no novo sistema, que se torna a fonte de verdade.
+## Tabela: `atos_autorizativos`
 
-**Contexto funcional:** os atos autorizativos são pareceres emanados oficialmente pelo CEE-SC.
+- `id` (PK)
+- `escola_id` (FK -> escolas.id, obrigatório)
+- `tipo_ato` (texto/enum, **obrigatório**)
+- `numero_ato` (texto, **obrigatório**)
+- `ano_ato` (inteiro, opcional)
+- `data_publicacao` (date, **obrigatório**)  
+  > usada na ordenação da seção “ATOS AUTORIZATIVOS”
+- `orgao_emissor` (texto, **obrigatório**)
+- `ementa_resumo` (texto, opcional)
+- `inicio_vigencia` (date, opcional)
+- `fim_vigencia` (date, opcional)
+- `status_vigencia` (enum: vigente, expirado, revogado, **obrigatório**)
+- `observacoes` (texto, **obrigatório no formulário**, pode ser curto)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
 
-## 2) Perfis e permissões
+## Tabela: `pareceres`
 
-**Decisão:** haverá múltiplos perfis, no mínimo:
+- `id` (PK)
+- `escola_id` (FK -> escolas.id, obrigatório)
+- `numero_parecer` (inteiro, obrigatório)
+- `ano_parecer` (inteiro, obrigatório)
+- `data_parecer` (date, obrigatório)
+- `ementa` (texto, obrigatório)
+- `texto_atos_gerado` (texto, opcional, snapshot para auditoria)
+- `status` (enum: rascunho, finalizado)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
 
-- perfil de **consulta**;
-- perfil de **edição** (cadastrar/editar/excluir escolas, atos e pareceres).
+## Tabela: `usuarios` (mínimo para perfis do MVP)
 
-## 3) Padrão textual da seção “ATOS AUTORIZATIVOS”
+- `id` (PK)
+- `nome` (texto, obrigatório)
+- `email` (texto, obrigatório, único)
+- `perfil` (enum: consulta, edicao)
+- `ativo` (boolean)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
 
-**Decisão de MVP:** adotar geração automática com padrão inicial e registrar que o template oficial final ainda será refinado.
+## Índices e regras recomendadas
 
-**Observação:** padronização fina de pontuação, caixa alta/baixa, prefixos e sufixos legais ficará como ajuste de regra em iteração seguinte.
+- `UNIQUE (numero_parecer, ano_parecer)` em `pareceres`.
+- Índice em `pareceres(escola_id, ano_parecer, numero_parecer)`.
+- Índice em `pareceres(status, data_parecer)` para filtros de listagem.
+- Índice em `atos_autorizativos(escola_id, data_publicacao)`.
+- Índice em `escolas(nome_oficial)`, `escolas(cnpj)`, `escolas(codigo_inep)`, `escolas(municipio)`.
+- Integridade: não permitir `parecer` sem `escola_id` válido.
 
-**Exemplo real informado:**
+## Regras de geração da seção “ATOS AUTORIZATIVOS” (MVP)
 
-> Parecer Nº279 de 19/08/2014: pelo Credenciamento da Instituição Hermann Blumenau Complexo Educacional, do Município de Blumenau, mantido por Hermann Blumenau Instituto de Educação Ltda.-ME, pertencente à rede privada de ensino, localizada à Rua Alameda Duque de Caxias, nº 20, Bairro Centro, no Município de Blumenau – SC e pela Autorização para o funcionamento do Curso Técnico de Nível Médio em Saúde Bucal, Eixo Tecnológico de Ambiente e Saúde.
-
-## 4) Campos obrigatórios no cadastro de ato autorizativo
-
-**Decisão:** obrigatórios no MVP:
-
-- tipo do ato;
-- número do ato;
-- data do ato;
-- órgão emissor;
-- vigência/status de vigência;
-- observações (campo disponível para complementaridade de texto legal).
-
-**Exemplo real informado:**
-
-> Parecer Nº279 de 19/08/2014: pelo Credenciamento da Instituição Hermann Blumenau Complexo Educacional, do Município de Blumenau, mantido por Hermann Blumenau Instituto de Educação Ltda.-ME, pertencente à rede privada de ensino, localizada à Rua Alameda Duque de Caxias, nº 20, Bairro Centro, no Município de Blumenau – SC e pela Autorização para o funcionamento do Curso Técnico de Nível Médio em Saúde Bucal, Eixo Tecnológico de Ambiente e Saúde.
-
-## 5) Ordenação automática dos atos no texto final
-
-**Decisão:** ordenação por **data de publicação**.
-
-## 6) Identificação única de escola
-
-**Decisão:** adotar identificador único e suportar atributos auxiliares para desambiguação de homônimos/renomeações:
-
-- código INEP;
-- CNPJ.
-
-## 7) Filtros de busca indispensáveis no MVP
-
-**Decisão:** incluir no MVP os filtros:
-
-- escola;
-- número/ano do parecer;
-- status;
-- intervalo de data;
-- texto livre na ementa;
-- CNPJ;
-- código INEP;
-- cidade.
-
-## 8) Validação de consistência antes da geração do texto
-
-**Decisão:** o sistema deve:
-
-- **bloquear** a geração quando houver dados obrigatórios incompletos;
-- exibir **mensagem orientativa** indicando o que falta corrigir.
+1. Buscar atos da escola vinculada ao parecer.
+2. Validar campos obrigatórios do ato (tipo, número, data_publicacao, órgão emissor, status_vigencia, observações).
+3. Bloquear geração se existir ato incompleto e exibir mensagem orientativa.
+4. Ordenar por `data_publicacao` (crescente).
+5. Renderizar texto padronizado para copiar/colar na minuta.
+6. Salvar snapshot em `texto_atos_gerado` para rastreabilidade do que foi usado no parecer.
