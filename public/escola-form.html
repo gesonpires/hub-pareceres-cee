@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Escola - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group label .required {
+            color: #dc3545;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group .error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="titulo">Nova Escola</h1>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        <div id="success-message" class="success-message" style="display: none;"></div>
+        
+        <form id="escola-form" onsubmit="salvarEscola(event)">
+            <div class="form-group">
+                <label>Nome Oficial <span class="required">*</span></label>
+                <input type="text" id="nomeOficial" required>
+                <div class="error" id="error-nomeOficial"></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Código INEP</label>
+                    <input type="text" id="codigoIneq">
+                    <div class="error" id="error-codigoIneq"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>CNPJ</label>
+                    <input type="text" id="cnpj" placeholder="00.000.000/0000-00">
+                    <div class="error" id="error-cnpj"></div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Município</label>
+                    <input type="text" id="municipio">
+                </div>
+                
+                <div class="form-group">
+                    <label>Rede de Ensino</label>
+                    <select id="redeEnsino">
+                        <option value="">Selecione...</option>
+                        <option value="estadual">Estadual</option>
+                        <option value="municipal">Municipal</option>
+                        <option value="privada">Privada</option>
+                        <option value="federal">Federal</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Situação</label>
+                <select id="situacao">
+                    <option value="ativa">Ativa</option>
+                    <option value="inativa">Inativa</option>
+                </select>
+            </div>
+            
+            <div class="buttons">
+                <button type="button" class="btn btn-secondary" onclick="voltar()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        let escolaId = null;
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Verificar se é edição
+        const urlParams = new URLSearchParams(window.location.search);
+        escolaId = urlParams.get('id');
+        
+        if (escolaId) {
+            document.getElementById('titulo').textContent = 'Editar Escola';
+            carregarEscola(escolaId);
+        }
+        
+        async function carregarEscola(id) {
+            try {
+                const response = await fetch(`${API_URL}/escolas/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para editar escolas.');
+                    return;
+                }
+                
+                const escola = await response.json();
+                
+                document.getElementById('nomeOficial').value = escola.nomeOficial || '';
+                document.getElementById('codigoIneq').value = escola.codigoIneq || '';
+                document.getElementById('cnpj').value = escola.cnpj || '';
+                document.getElementById('municipio').value = escola.municipio || '';
+                document.getElementById('redeEnsino').value = escola.redeEnsino || '';
+                document.getElementById('situacao').value = escola.situacao || 'ativa';
+            } catch (error) {
+                mostrarErro('Erro ao carregar escola: ' + error.message);
+            }
+        }
+        
+        async function salvarEscola(event) {
+            event.preventDefault();
+            
+            const dados = {
+                nomeOficial: document.getElementById('nomeOficial').value.trim(),
+                codigoIneq: document.getElementById('codigoIneq').value.trim() || null,
+                cnpj: document.getElementById('cnpj').value.trim() || null,
+                municipio: document.getElementById('municipio').value.trim() || null,
+                redeEnsino: document.getElementById('redeEnsino').value || null,
+                situacao: document.getElementById('situacao').value,
+            };
+            
+            // Limpar erros anteriores
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            
+            try {
+                const url = escolaId 
+                    ? `${API_URL}/escolas/${escolaId}`
+                    : `${API_URL}/escolas`;
+                
+                const method = escolaId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para criar/editar escolas.');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    mostrarSucesso(escolaId ? 'Escola atualizada com sucesso!' : 'Escola criada com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = '/escolas.html';
+                    }, 1500);
+                } else {
+                    // Mostrar erros de validação
+                    if (result.error) {
+                        mostrarErro(result.error);
+                    }
+                }
+            } catch (error) {
+                mostrarErro('Erro ao salvar escola: ' + error.message);
+            }
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+        }
+        
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = 'block';
+        }
+        
+        function voltar() {
+            window.location.href = '/escolas.html';
+        }
+    </script>
+</body>
+</html>

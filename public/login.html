@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hub Pareceres CEE</h1>
+        <p class="subtitle">Faça login para continuar</p>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <form id="login-form" onsubmit="fazerLogin(event)">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="senha" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+        
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+            <p><strong>Usuários de teste:</strong></p>
+            <p>Consulta: consulta@cee.sc.gov.br / senha123</p>
+            <p>Edição: edicao@cee.sc.gov.br / senha123</p>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        // Verificar se já está logado
+        if (localStorage.getItem('token')) {
+            window.location.href = '/escolas.html';
+        }
+        
+        async function fazerLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            
+            document.getElementById('error-message').style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/escolas.html';
+                } else {
+                    mostrarErro(data.error || 'Credenciais inválidas');
+                }
+            } catch (error) {
+                mostrarErro('Erro ao fazer login: ' + error.message);
+            }
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

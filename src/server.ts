@@ -23,9 +23,25 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/escolas', escolasRoutes);
 
-// Rota para página 403
+// Rotas de páginas
 app.get('/403', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/403.html'));
+});
+
+app.get('/escolas.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/escolas.html'));
+});
+
+app.get('/escola-form.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/escola-form.html'));
+});
+
+app.get('/login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
 });
 
 // Health check

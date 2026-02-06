@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolas - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn-filter {
+            background: #28a745;
+            color: white;
+            align-self: flex-end;
+        }
+        
+        .btn-filter:hover {
+            background: #218838;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-ativa {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-inativa {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+        
+        .btn-deactivate {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-deactivate:hover {
+            background: #c82333;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Escolas</h1>
+            <button class="btn btn-primary" onclick="abrirFormulario()">+ Nova Escola</button>
+        </div>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>Nome</label>
+                <input type="text" id="filter-nome" placeholder="Buscar por nome">
+            </div>
+            <div class="filter-group">
+                <label>Cidade</label>
+                <input type="text" id="filter-cidade" placeholder="Buscar por cidade">
+            </div>
+            <div class="filter-group">
+                <label>CNPJ</label>
+                <input type="text" id="filter-cnpj" placeholder="Buscar por CNPJ">
+            </div>
+            <div class="filter-group">
+                <label>Código INEP</label>
+                <input type="text" id="filter-inep" placeholder="Buscar por INEP">
+            </div>
+            <div class="filter-group">
+                <label>Situação</label>
+                <select id="filter-situacao">
+                    <option value="">Todas</option>
+                    <option value="ativa">Ativa</option>
+                    <option value="inativa">Inativa</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button class="btn btn-filter" onclick="filtrarEscolas()">Filtrar</button>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">Carregando escolas...</div>
+        <div id="escolas-container" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome Oficial</th>
+                        <th>Código INEP</th>
+                        <th>CNPJ</th>
+                        <th>Município</th>
+                        <th>Rede</th>
+                        <th>Situação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="escolas-tbody">
+                </tbody>
+            </table>
+        </div>
+        <div id="empty" class="empty" style="display: none;">
+            Nenhuma escola encontrada.
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        async function carregarEscolas() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('escolas-container').style.display = 'none';
+                document.getElementById('empty').style.display = 'none';
+                document.getElementById('error-message').style.display = 'none';
+                
+                const params = new URLSearchParams();
+                const nome = document.getElementById('filter-nome').value;
+                const cidade = document.getElementById('filter-cidade').value;
+                const cnpj = document.getElementById('filter-cnpj').value;
+                const inep = document.getElementById('filter-inep').value;
+                const situacao = document.getElementById('filter-situacao').value;
+                
+                if (nome) params.append('nome', nome);
+                if (cidade) params.append('cidade', cidade);
+                if (cnpj) params.append('cnpj', cnpj);
+                if (inep) params.append('inep', inep);
+                if (situacao) params.append('situacao', situacao);
+                
+                const response = await fetch(`${API_URL}/escolas?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.escolas && data.escolas.length > 0) {
+                    document.getElementById('escolas-container').style.display = 'block';
+                    renderizarEscolas(data.escolas);
+                } else {
+                    document.getElementById('empty').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                mostrarErro('Erro ao carregar escolas: ' + error.message);
+            }
+        }
+        
+        function renderizarEscolas(escolas) {
+            const tbody = document.getElementById('escolas-tbody');
+            tbody.innerHTML = '';
+            
+            escolas.forEach(escola => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escola.nomeOficial}</td>
+                    <td>${escola.codigoIneq || '-'}</td>
+                    <td>${escola.cnpj || '-'}</td>
+                    <td>${escola.municipio || '-'}</td>
+                    <td>${escola.redeEnsino || '-'}</td>
+                    <td><span class="badge badge-${escola.situacao}">${escola.situacao}</span></td>
+                    <td class="actions">
+                        <button class="btn btn-sm btn-edit" onclick="editarEscola('${escola.id}')">Editar</button>
+                        ${escola.situacao === 'ativa' ? `<button class="btn btn-sm btn-deactivate" onclick="desativarEscola('${escola.id}')">Desativar</button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function filtrarEscolas() {
+            carregarEscolas();
+        }
+        
+        function abrirFormulario(id = null) {
+            window.location.href = `/escola-form.html${id ? '?id=' + id : ''}`;
+        }
+        
+        function editarEscola(id) {
+            abrirFormulario(id);
+        }
+        
+        async function desativarEscola(id) {
+            if (!confirm('Tem certeza que deseja desativar esta escola?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/escolas/${id}/desativar`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para desativar escolas.');
+                    return;
+                }
+                
+                if (response.ok) {
+                    carregarEscolas();
+                } else {
+                    const data = await response.json();
+                    mostrarErro(data.error || 'Erro ao desativar escola');
+                }
+            } catch (error) {
+                mostrarErro('Erro ao desativar escola: ' + error.message);
+            }
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Carregar escolas ao carregar a página
+        carregarEscolas();
+    </script>
+</body>
+</html>

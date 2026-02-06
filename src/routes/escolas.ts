@@ -1,5 +1,12 @@
 import express from 'express';
-import { authenticateToken, requirePerfil, AuthRequest } from '../middleware/auth';
+import { authenticateToken, requirePerfil } from '../middleware/auth';
+import {
+  criarEscola,
+  listarEscolas,
+  obterEscola,
+  atualizarEscola,
+  desativarEscola,
+} from '../controllers/escolasController';
 
 const router = express.Router();
 
@@ -7,35 +14,18 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // GET /escolas - Permitido para todos os perfis autenticados
-router.get('/', (req: express.Request, res: express.Response) => {
-  res.json({ 
-    message: 'Lista de escolas (permitido para todos os perfis)',
-    user: (req as AuthRequest).user 
-  });
-});
+router.get('/', listarEscolas);
+
+// GET /escolas/:id - Permitido para todos os perfis autenticados
+router.get('/:id', obterEscola);
 
 // POST /escolas - Apenas perfil edicao
-router.post('/', requirePerfil(['edicao']), (req: express.Request, res: express.Response) => {
-  res.json({ 
-    message: 'Escola criada com sucesso',
-    user: (req as AuthRequest).user 
-  });
-});
+router.post('/', requirePerfil(['edicao']), criarEscola);
 
 // PUT /escolas/:id - Apenas perfil edicao
-router.put('/:id', requirePerfil(['edicao']), (req: express.Request, res: express.Response) => {
-  res.json({ 
-    message: `Escola ${req.params.id} atualizada com sucesso`,
-    user: (req as AuthRequest).user 
-  });
-});
+router.put('/:id', requirePerfil(['edicao']), atualizarEscola);
 
-// DELETE /escolas/:id - Apenas perfil edicao
-router.delete('/:id', requirePerfil(['edicao']), (req: express.Request, res: express.Response) => {
-  res.json({ 
-    message: `Escola ${req.params.id} excluída com sucesso`,
-    user: (req as AuthRequest).user 
-  });
-});
+// PATCH /escolas/:id/desativar - Apenas perfil edicao (desativação lógica)
+router.patch('/:id/desativar', requirePerfil(['edicao']), desativarEscola);
 
 export default router;
