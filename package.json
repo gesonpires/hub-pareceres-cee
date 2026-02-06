@@ -1,0 +1,21 @@
+{
+  "name": "hub-pareceres-cee",
+  "version": "1.0.0-mvp",
+  "description": "Sistema para geração automática da seção ATOS AUTORIZATIVOS dos pareceres do CEE-SC",
+  "scripts": {
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset",
+    "dev": "echo 'Backend e frontend ainda não configurados'"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.3.0",
+    "better-sqlite3": "^12.6.2",
+    "prisma": "^7.3.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
+}

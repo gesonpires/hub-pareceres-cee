@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Escola {
+  id            String   @id @default(cuid())
+  nomeOficial   String   @map("nome_oficial")
+  codigoIneq    String?  @unique @map("codigo_inep")
+  cnpj          String?
+  municipio     String?
+  redeEnsino    String?  @map("rede_ensino")
+  situacao      String   @default("ativa") // ativa, inativa
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  atosAutorizativos AtosAutorizativos[]
+  pareceres        Parecer[]
+
+  @@index([nomeOficial])
+  @@index([cnpj])
+  @@index([codigoIneq])
+  @@index([municipio])
+  @@map("escolas")
+}
+
+model AtosAutorizativos {
+  id              String   @id @default(cuid())
+  escolaId        String   @map("escola_id")
+  tipoAto         String   @map("tipo_ato")
+  numeroAto       String   @map("numero_ato")
+  anoAto          Int?     @map("ano_ato")
+  dataPublicacao  DateTime @map("data_publicacao")
+  orgaoEmissor    String   @map("orgao_emissor")
+  ementaResumo    String?  @map("ementa_resumo")
+  inicioVigencia  DateTime? @map("inicio_vigencia")
+  fimVigencia     DateTime? @map("fim_vigencia")
+  statusVigencia  String   @map("status_vigencia") // vigente, expirado, revogado
+  observacoes     String
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  escola Escola @relation(fields: [escolaId], references: [id], onDelete: Cascade)
+
+  @@index([escolaId, dataPublicacao])
+  @@map("atos_autorizativos")
+}
+
+model Parecer {
+  id                String   @id @default(cuid())
+  escolaId          String   @map("escola_id")
+  numeroParecer     Int      @map("numero_parecer")
+  anoParecer        Int      @map("ano_parecer")
+  dataParecer       DateTime @map("data_parecer")
+  ementa            String
+  textoAtosGerado   String?  @map("texto_atos_gerado")
+  status            String   @default("rascunho") // rascunho, finalizado
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  escola Escola @relation(fields: [escolaId], references: [id], onDelete: Cascade)
+
+  @@unique([numeroParecer, anoParecer])
+  @@index([escolaId, anoParecer, numeroParecer])
+  @@index([status, dataParecer])
+  @@map("pareceres")
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  perfil    String   // consulta, edicao
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("usuarios")
+}
