@@ -35,7 +35,13 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
       standardFontDataUrl: undefined // Usar fontes padrão
     });
     await parser.load();
-    const text = parser.getText();
+    let text = parser.getText();
+    
+    // Se getText() retornar uma Promise, aguardar
+    if (text && typeof text.then === 'function') {
+      text = await text;
+    }
+    
     // Garantir que retornamos uma string
     if (typeof text === 'string') {
       return text;

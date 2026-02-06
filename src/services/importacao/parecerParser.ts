@@ -46,8 +46,9 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
   }
 
   // Tentar extrair data do parecer
-  // Padrões: "Data: 15/03/2024", "15/03/2024", "Data do Parecer:", etc.
+  // Padrões: "APROVADO EM 23/01/2025", "Data: 15/03/2024", "15/03/2024", etc.
   const dataPatterns = [
+    /(?:aprovado\s+em|aprovado|data\s+de\s+aprova[çc][ãa]o)[\s:]*(\d{2})\/(\d{2})\/(\d{4})/i,
     /(?:data|data\s+do\s+parecer|data\s+de\s+publica[çc][ãa]o)[\s:]*(\d{2})\/(\d{2})\/(\d{4})/i,
     /(?:florian[óo]polis|floripa|sc)[\s,]*(\d{2})\/(\d{2})\/(\d{4})/i, // Data após localização
     /(\d{2})\/(\d{2})\/(\d{4})/g
@@ -103,19 +104,22 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
     if (match && match[1]) {
       // Pegar até 1000 caracteres após a palavra-chave (mais para OBJETO)
       let ementa = match[1].trim();
+      
+      // Tentar pegar até o próximo título ou seção ANTES de normalizar
+      const proximoTitulo = ementa.search(/\n\s*(?:PROCED[ÊE]NCIA|PROCESSO|I\s*[–-]\s*HIST[ÓO]RICO|II\s*[–-]\s*AN[ÁA]LISE|RELAT[ÓO]RIO|VOTO|DECIS[ÃA]O|CONSIDERANDO|RESOLU[ÇC][ÃA]O)/i);
+      if (proximoTitulo > 0) {
+        ementa = ementa.substring(0, proximoTitulo).trim();
+      }
+      
       // Remover quebras de linha excessivas e normalizar espaços
       ementa = ementa.replace(/\s+/g, ' ').trim();
+      
       // Limitar tamanho (OBJETO pode ser mais longo)
       const limite = pattern.source.includes('objeto') ? 1000 : 800;
       if (ementa.length > limite) {
-        // Tentar pegar até o próximo título ou seção
-        const proximoTitulo = ementa.search(/\n\s*(?:RELAT[ÓO]RIO|VOTO|DECIS[ÃA]O|CONSIDERANDO|RESOLU[ÇC][ÃA]O)/i);
-        if (proximoTitulo > 0 && proximoTitulo < limite) {
-          ementa = ementa.substring(0, proximoTitulo).trim();
-        } else {
-          ementa = ementa.substring(0, limite) + '...';
-        }
+        ementa = ementa.substring(0, limite) + '...';
       }
+      
       if (ementa.length >= 20) { // Só aceitar se tiver pelo menos 20 caracteres
         dados.ementa = ementa;
         break;
