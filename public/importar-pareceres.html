@@ -791,9 +791,27 @@
         }
         
         function selecionarEscola(id, escolaId, nomeEscola) {
-            document.getElementById(`escola-id-${id}`).value = escolaId;
-            document.getElementById(`escola-busca-${id}`).value = nomeEscola;
-            document.getElementById(`sugestoes-escola-${id}`).style.display = 'none';
+            console.log('[SELECIONAR ESCOLA]', { id, escolaId, nomeEscola });
+            const escolaIdElement = document.getElementById(`escola-id-${id}`);
+            const escolaBuscaElement = document.getElementById(`escola-busca-${id}`);
+            const sugestoesElement = document.getElementById(`sugestoes-escola-${id}`);
+            
+            if (!escolaIdElement || !escolaBuscaElement) {
+                console.error('[SELECIONAR ESCOLA] Elementos não encontrados!');
+                return;
+            }
+            
+            escolaIdElement.value = escolaId;
+            escolaBuscaElement.value = nomeEscola;
+            
+            if (sugestoesElement) {
+                sugestoesElement.style.display = 'none';
+            }
+            
+            console.log('[SELECIONAR ESCOLA] Escola selecionada:', {
+                escolaId: escolaIdElement.value,
+                nomeEscola: escolaBuscaElement.value
+            });
         }
         
         // Tornar funções globalmente acessíveis
@@ -842,13 +860,26 @@
             // Validação
             if (!escolaId || !numeroParecer || !anoParecer || !dataParecer || !ementa) {
                 const camposFaltantes = [];
-                if (!escolaId) camposFaltantes.push('Escola');
+                if (!escolaId) camposFaltantes.push('Escola (selecione uma escola da lista de sugestões)');
                 if (!numeroParecer) camposFaltantes.push('Número do Parecer');
                 if (!anoParecer) camposFaltantes.push('Ano do Parecer');
                 if (!dataParecer) camposFaltantes.push('Data do Parecer');
                 if (!ementa) camposFaltantes.push('Ementa');
                 
-                mostrarErro(`Por favor, preencha todos os campos obrigatórios: ${camposFaltantes.join(', ')}`);
+                mostrarErro(`Por favor, preencha todos os campos obrigatórios:\n${camposFaltantes.join('\n')}`);
+                
+                // Destacar campo de escola se estiver vazio
+                if (!escolaId) {
+                    const escolaBuscaElement = document.getElementById(`escola-busca-${id}`);
+                    if (escolaBuscaElement) {
+                        escolaBuscaElement.style.borderColor = '#dc3545';
+                        escolaBuscaElement.focus();
+                        setTimeout(() => {
+                            escolaBuscaElement.style.borderColor = '';
+                        }, 3000);
+                    }
+                }
+                
                 return;
             }
             
