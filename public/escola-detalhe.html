@@ -294,6 +294,140 @@
         .required-field {
             color: #dc3545;
         }
+        
+        /* Modal de confirmação */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            padding: 24px;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .modal-icon {
+            font-size: 24px;
+        }
+        
+        .modal-message {
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: #5a6268;
+        }
+        
+        .modal-btn-confirm {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            background: #c82333;
+        }
+        
+        /* Alerta de sucesso */
+        .success-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+        }
+        
+        .success-alert.show {
+            display: flex;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .success-alert-icon {
+            font-size: 24px;
+        }
+        
+        .success-alert-message {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -516,10 +650,34 @@
             abrirFormularioAto(id);
         }
         
-        async function excluirAto(id) {
-            if (!confirm('Tem certeza que deseja excluir este ato autorizativo?')) {
+        let atoParaExcluir = null;
+        
+        function excluirAto(id) {
+            atoParaExcluir = id;
+            abrirModal();
+        }
+        
+        function abrirModal() {
+            const modal = document.getElementById('modal-confirmacao');
+            modal.classList.add('show');
+            
+            // Focar no botão de cancelar para melhor acessibilidade
+            document.querySelector('.modal-btn-cancel').focus();
+        }
+        
+        function fecharModal() {
+            const modal = document.getElementById('modal-confirmacao');
+            modal.classList.remove('show');
+            atoParaExcluir = null;
+        }
+        
+        async function confirmarExclusao() {
+            if (!atoParaExcluir) {
                 return;
             }
+            
+            const id = atoParaExcluir;
+            fecharModal();
             
             try {
                 const response = await fetch(`${API_URL}/atos/${id}`, {
@@ -542,6 +700,7 @@
                 }
                 
                 if (response.ok) {
+                    mostrarSucessoExclusao();
                     carregarAtos();
                 } else {
                     const data = await response.json();
@@ -551,6 +710,35 @@
                 mostrarErro('Erro ao excluir ato: ' + error.message);
             }
         }
+        
+        function mostrarSucessoExclusao() {
+            const alert = document.getElementById('success-alert');
+            alert.classList.add('show');
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Fechar modal ao clicar fora
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('modal-confirmacao');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    fecharModal();
+                }
+            });
+            
+            // Fechar modal com ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('show')) {
+                    fecharModal();
+                }
+            });
+            
+            // Botão de confirmar exclusão
+            document.getElementById('btn-confirmar-exclusao').addEventListener('click', confirmarExclusao);
+        });
         
         function mostrarErro(mensagem) {
             const errorDiv = document.getElementById('error-message');
