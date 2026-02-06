@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Parecer - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .info-section {
+            margin-bottom: 32px;
+        }
+        
+        .info-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        .section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #eee;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .texto-gerado {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 16px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            min-height: 100px;
+        }
+        
+        .texto-vazio {
+            color: #999;
+            font-style: italic;
+            font-family: inherit;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-success:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-rascunho {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-finalizado {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Parecer Nº <span id="numero-parecer">-</span>/<span id="ano-parecer">-</span></h1>
+                <a href="/pareceres.html" class="btn btn-secondary">← Voltar para Pareceres</a>
+            </div>
+            <div class="actions">
+                <a href="#" id="link-editar" class="btn btn-primary">Editar</a>
+            </div>
+        </div>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        <div id="success-message" class="success-message" style="display: none;"></div>
+        
+        <div id="loading" class="loading">Carregando parecer...</div>
+        
+        <div id="parecer-content" style="display: none;">
+            <div class="info-section">
+                <div class="info-row">
+                    <div class="info-label">Escola:</div>
+                    <div class="info-value" id="escola-nome">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Data do Parecer:</div>
+                    <div class="info-value" id="data-parecer">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Status:</div>
+                    <div class="info-value">
+                        <span id="status-badge" class="badge">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Ementa</div>
+                <div id="ementa" style="line-height: 1.8; color: #333;"></div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">ATOS AUTORIZATIVOS</div>
+                <div id="texto-atos" class="texto-gerado texto-vazio">
+                    Nenhum texto gerado ainda.
+                </div>
+                <div class="actions" style="margin-top: 16px;">
+                    <button type="button" class="btn btn-success" onclick="copiarTexto()" id="btn-copiar" disabled>
+                        Copiar para área de transferência
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        let parecerId = null;
+        let textoAtosGerado = null;
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Obter parecerId da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        parecerId = urlParams.get('id');
+        
+        if (!parecerId) {
+            window.location.href = '/pareceres.html';
+        }
+        
+        async function carregarParecer() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('parecer-content').style.display = 'none';
+                document.getElementById('error-message').style.display = 'none';
+                
+                const response = await fetch(`${API_URL}/pareceres/${parecerId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const parecer = await response.json();
+                
+                document.getElementById('numero-parecer').textContent = parecer.numeroParecer;
+                document.getElementById('ano-parecer').textContent = parecer.anoParecer;
+                document.getElementById('escola-nome').textContent = parecer.escola.nomeOficial;
+                document.getElementById('data-parecer').textContent = new Date(parecer.dataParecer).toLocaleDateString('pt-BR');
+                
+                const statusBadge = document.getElementById('status-badge');
+                statusBadge.textContent = parecer.status;
+                statusBadge.className = `badge badge-${parecer.status}`;
+                
+                document.getElementById('ementa').textContent = parecer.ementa;
+                
+                if (parecer.textoAtosGerado) {
+                    textoAtosGerado = parecer.textoAtosGerado;
+                    document.getElementById('texto-atos').textContent = parecer.textoAtosGerado;
+                    document.getElementById('texto-atos').classList.remove('texto-vazio');
+                    document.getElementById('btn-copiar').disabled = false;
+                }
+                
+                document.getElementById('link-editar').href = `/parecer-form.html?id=${parecer.id}`;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('parecer-content').style.display = 'block';
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                mostrarErro('Erro ao carregar parecer: ' + error.message);
+            }
+        }
+        
+        function copiarTexto() {
+            if (!textoAtosGerado) {
+                mostrarErro('Nenhum texto gerado para copiar.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(textoAtosGerado).then(() => {
+                mostrarSucesso('Texto copiado para a área de transferência!');
+            }).catch(() => {
+                // Fallback para navegadores antigos
+                const textarea = document.createElement('textarea');
+                textarea.value = textoAtosGerado;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                mostrarSucesso('Texto copiado para a área de transferência!');
+            });
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+        }
+        
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Carregar parecer ao carregar a página
+        carregarParecer();
+    </script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pareceres - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+        }
+        
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 6px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-filter {
+            background: #28a745;
+            color: white;
+            align-self: flex-end;
+        }
+        
+        .btn-filter:hover {
+            background: #218838;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-rascunho {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-finalizado {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #138496;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .btn-edit:hover {
+            background: #e0a800;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pareceres</h1>
+            <button class="btn btn-primary" onclick="abrirFormulario()">+ Novo Parecer</button>
+        </div>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>Escola</label>
+                <input type="text" id="filter-escola" placeholder="Nome da escola">
+            </div>
+            <div class="filter-group">
+                <label>Número</label>
+                <input type="number" id="filter-numero" placeholder="Número do parecer">
+            </div>
+            <div class="filter-group">
+                <label>Ano</label>
+                <input type="number" id="filter-ano" placeholder="Ano do parecer">
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="filter-status">
+                    <option value="">Todos</option>
+                    <option value="rascunho">Rascunho</option>
+                    <option value="finalizado">Finalizado</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Data Início</label>
+                <input type="date" id="filter-data-inicio">
+            </div>
+            <div class="filter-group">
+                <label>Data Fim</label>
+                <input type="date" id="filter-data-fim">
+            </div>
+            <div class="filter-group">
+                <label>Ementa</label>
+                <input type="text" id="filter-ementa" placeholder="Buscar na ementa">
+            </div>
+            <div class="filter-group">
+                <label>Cidade</label>
+                <input type="text" id="filter-cidade" placeholder="Cidade da escola">
+            </div>
+            <div class="filter-group">
+                <label>CNPJ</label>
+                <input type="text" id="filter-cnpj" placeholder="CNPJ da escola">
+            </div>
+            <div class="filter-group">
+                <label>Código INEP</label>
+                <input type="text" id="filter-inep" placeholder="INEP da escola">
+            </div>
+            <div class="filter-group">
+                <button class="btn btn-filter" onclick="filtrarPareceres()">Filtrar</button>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">Carregando pareceres...</div>
+        <div id="pareceres-container" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número/Ano</th>
+                        <th>Data</th>
+                        <th>Escola</th>
+                        <th>Cidade</th>
+                        <th>Ementa</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="pareceres-tbody">
+                </tbody>
+            </table>
+        </div>
+        <div id="empty" class="empty" style="display: none;">
+            Nenhum parecer encontrado.
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        async function carregarPareceres() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('pareceres-container').style.display = 'none';
+                document.getElementById('empty').style.display = 'none';
+                document.getElementById('error-message').style.display = 'none';
+                
+                const params = new URLSearchParams();
+                const escola = document.getElementById('filter-escola').value;
+                const numero = document.getElementById('filter-numero').value;
+                const ano = document.getElementById('filter-ano').value;
+                const status = document.getElementById('filter-status').value;
+                const dataInicio = document.getElementById('filter-data-inicio').value;
+                const dataFim = document.getElementById('filter-data-fim').value;
+                const ementa = document.getElementById('filter-ementa').value;
+                const cidade = document.getElementById('filter-cidade').value;
+                const cnpj = document.getElementById('filter-cnpj').value;
+                const inep = document.getElementById('filter-inep').value;
+                
+                if (escola) params.append('escola', escola);
+                if (numero) params.append('numero', numero);
+                if (ano) params.append('ano', ano);
+                if (status) params.append('status', status);
+                if (dataInicio) params.append('dataInicio', dataInicio);
+                if (dataFim) params.append('dataFim', dataFim);
+                if (ementa) params.append('ementa', ementa);
+                if (cidade) params.append('cidade', cidade);
+                if (cnpj) params.append('cnpj', cnpj);
+                if (inep) params.append('inep', inep);
+                
+                const response = await fetch(`${API_URL}/pareceres?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (data.pareceres && data.pareceres.length > 0) {
+                    document.getElementById('pareceres-container').style.display = 'block';
+                    renderizarPareceres(data.pareceres);
+                } else {
+                    document.getElementById('empty').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                mostrarErro('Erro ao carregar pareceres: ' + error.message);
+            }
+        }
+        
+        function renderizarPareceres(pareceres) {
+            const tbody = document.getElementById('pareceres-tbody');
+            tbody.innerHTML = '';
+            
+            pareceres.forEach(parecer => {
+                const tr = document.createElement('tr');
+                const dataParecer = new Date(parecer.dataParecer).toLocaleDateString('pt-BR');
+                const ementaResumida = parecer.ementa.length > 60 
+                    ? parecer.ementa.substring(0, 60) + '...' 
+                    : parecer.ementa;
+                
+                tr.innerHTML = `
+                    <td>${parecer.numeroParecer}/${parecer.anoParecer}</td>
+                    <td>${dataParecer}</td>
+                    <td>${parecer.escola.nomeOficial}</td>
+                    <td>${parecer.escola.municipio || '-'}</td>
+                    <td>${ementaResumida}</td>
+                    <td><span class="badge badge-${parecer.status}">${parecer.status}</span></td>
+                    <td class="actions">
+                        <a href="/parecer-view.html?id=${parecer.id}" class="btn btn-sm btn-view">Ver</a>
+                        <button class="btn btn-sm btn-edit" onclick="editarParecer('${parecer.id}')">Editar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function filtrarPareceres() {
+            carregarPareceres();
+        }
+        
+        function abrirFormulario(id = null) {
+            window.location.href = `/parecer-form.html${id ? '?id=' + id : ''}`;
+        }
+        
+        function editarParecer(id) {
+            abrirFormulario(id);
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Carregar pareceres ao carregar a página
+        carregarPareceres();
+    </script>
+</body>
+</html>

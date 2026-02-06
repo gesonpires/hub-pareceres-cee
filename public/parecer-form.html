@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Parecer - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group label .required {
+            color: #dc3545;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #eee;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        
+        .atos-gerados {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+        
+        .texto-gerado {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .texto-vazio {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-success:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .warning-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .actions-atos {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="titulo">Novo Parecer</h1>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        <div id="success-message" class="success-message" style="display: none;"></div>
+        <div id="warning-message" class="warning-message" style="display: none;"></div>
+        
+        <form id="parecer-form" onsubmit="salvarParecer(event)">
+            <div class="form-group">
+                <label>Escola <span class="required">*</span></label>
+                <select id="escolaId" required>
+                    <option value="">Selecione uma escola...</option>
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Número do Parecer <span class="required">*</span></label>
+                    <input type="number" id="numeroParecer" required min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>Ano do Parecer <span class="required">*</span></label>
+                    <input type="number" id="anoParecer" required min="1900" max="2100" value="2024">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Data do Parecer <span class="required">*</span></label>
+                <input type="date" id="dataParecer" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Ementa <span class="required">*</span></label>
+                <textarea id="ementa" required placeholder="Descreva a ementa do parecer"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Status</label>
+                <select id="status">
+                    <option value="rascunho">Rascunho</option>
+                    <option value="finalizado">Finalizado</option>
+                </select>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">ATOS AUTORIZATIVOS (gerado)</div>
+                <div class="atos-gerados">
+                    <div id="texto-atos" class="texto-gerado texto-vazio">
+                        Clique em "Gerar/Atualizar texto" para gerar a seção de atos autorizativos.
+                    </div>
+                    <div class="actions-atos">
+                        <button type="button" class="btn btn-success" onclick="gerarTextoAtos()" id="btn-gerar">
+                            Gerar/Atualizar texto
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="copiarTexto()" id="btn-copiar" disabled>
+                            Copiar para área de transferência
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button type="button" class="btn btn-secondary" onclick="voltar()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        let parecerId = null;
+        let textoAtosGerado = null;
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Verificar se é edição
+        const urlParams = new URLSearchParams(window.location.search);
+        parecerId = urlParams.get('id');
+        
+        // Carregar escolas para o select
+        async function carregarEscolas() {
+            try {
+                const response = await fetch(`${API_URL}/escolas`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                const data = await response.json();
+                const select = document.getElementById('escolaId');
+                
+                data.escolas.forEach(escola => {
+                    const option = document.createElement('option');
+                    option.value = escola.id;
+                    option.textContent = escola.nomeOficial;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                mostrarErro('Erro ao carregar escolas: ' + error.message);
+            }
+        }
+        
+        if (parecerId) {
+            document.getElementById('titulo').textContent = 'Editar Parecer';
+            carregarParecer(parecerId);
+        }
+        
+        async function carregarParecer(id) {
+            try {
+                const response = await fetch(`${API_URL}/pareceres/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para editar pareceres.');
+                    return;
+                }
+                
+                const parecer = await response.json();
+                
+                await carregarEscolas(); // Aguardar escolas carregarem antes de selecionar
+                
+                document.getElementById('escolaId').value = parecer.escolaId;
+                document.getElementById('numeroParecer').value = parecer.numeroParecer;
+                document.getElementById('anoParecer').value = parecer.anoParecer;
+                document.getElementById('dataParecer').value = parecer.dataParecer ? parecer.dataParecer.split('T')[0] : '';
+                document.getElementById('ementa').value = parecer.ementa || '';
+                document.getElementById('status').value = parecer.status || 'rascunho';
+                
+                if (parecer.textoAtosGerado) {
+                    textoAtosGerado = parecer.textoAtosGerado;
+                    document.getElementById('texto-atos').textContent = parecer.textoAtosGerado;
+                    document.getElementById('texto-atos').classList.remove('texto-vazio');
+                    document.getElementById('btn-copiar').disabled = false;
+                }
+            } catch (error) {
+                mostrarErro('Erro ao carregar parecer: ' + error.message);
+            }
+        }
+        
+        async function gerarTextoAtos() {
+            const escolaId = document.getElementById('escolaId').value;
+            
+            if (!escolaId) {
+                mostrarErro('Selecione uma escola antes de gerar o texto.');
+                return;
+            }
+            
+            try {
+                document.getElementById('btn-gerar').disabled = true;
+                document.getElementById('btn-gerar').textContent = 'Gerando...';
+                
+                // Por enquanto, apenas simular - a geração real será implementada na Fase G
+                mostrarWarning('A geração do texto "ATOS AUTORIZATIVOS" será implementada na Fase G. Por enquanto, este é um placeholder.');
+                
+                // TODO: Implementar chamada para endpoint de geração na Fase G
+                // const response = await fetch(`${API_URL}/pareceres/${parecerId || 'new'}/gerar-texto-atos`, {
+                //     method: 'POST',
+                //     headers: {
+                //         'Authorization': `Bearer ${token}`,
+                //         'Content-Type': 'application/json'
+                //     },
+                //     body: JSON.stringify({ escolaId })
+                // });
+                
+                document.getElementById('btn-gerar').disabled = false;
+                document.getElementById('btn-gerar').textContent = 'Gerar/Atualizar texto';
+            } catch (error) {
+                mostrarErro('Erro ao gerar texto: ' + error.message);
+                document.getElementById('btn-gerar').disabled = false;
+                document.getElementById('btn-gerar').textContent = 'Gerar/Atualizar texto';
+            }
+        }
+        
+        function copiarTexto() {
+            if (!textoAtosGerado) {
+                mostrarErro('Nenhum texto gerado para copiar.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(textoAtosGerado).then(() => {
+                mostrarSucesso('Texto copiado para a área de transferência!');
+            }).catch(() => {
+                // Fallback para navegadores antigos
+                const textarea = document.createElement('textarea');
+                textarea.value = textoAtosGerado;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                mostrarSucesso('Texto copiado para a área de transferência!');
+            });
+        }
+        
+        async function salvarParecer(event) {
+            event.preventDefault();
+            
+            const dados = {
+                escolaId: document.getElementById('escolaId').value,
+                numeroParecer: parseInt(document.getElementById('numeroParecer').value),
+                anoParecer: parseInt(document.getElementById('anoParecer').value),
+                dataParecer: document.getElementById('dataParecer').value,
+                ementa: document.getElementById('ementa').value.trim(),
+                status: document.getElementById('status').value,
+            };
+            
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            document.getElementById('warning-message').style.display = 'none';
+            
+            try {
+                const url = parecerId 
+                    ? `${API_URL}/pareceres/${parecerId}`
+                    : `${API_URL}/pareceres`;
+                
+                const method = parecerId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para criar/editar pareceres.');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (!parecerId) {
+                        parecerId = result.id;
+                    }
+                    mostrarSucesso(parecerId ? 'Parecer atualizado com sucesso!' : 'Parecer criado com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = `/parecer-view.html?id=${result.id}`;
+                    }, 1500);
+                } else {
+                    mostrarErro(result.error || 'Erro ao salvar parecer');
+                }
+            } catch (error) {
+                mostrarErro('Erro ao salvar parecer: ' + error.message);
+            }
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = 'block';
+        }
+        
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = 'block';
+        }
+        
+        function mostrarWarning(mensagem) {
+            const warningDiv = document.getElementById('warning-message');
+            warningDiv.textContent = mensagem;
+            warningDiv.style.display = 'block';
+        }
+        
+        function voltar() {
+            window.location.href = '/pareceres.html';
+        }
+        
+        // Carregar escolas ao carregar a página
+        if (!parecerId) {
+            carregarEscolas();
+        }
+        
+        // Definir data padrão como hoje
+        if (!parecerId) {
+            document.getElementById('dataParecer').valueAsDate = new Date();
+        }
+    </script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import path from 'path';
 import authRoutes from './routes/auth';
 import escolasRoutes from './routes/escolas';
 import atosRoutes from './routes/atos';
+import pareceresRoutes from './routes/pareceres';
 import { authenticateToken, requirePerfil } from './middleware/auth';
 import { listarAtos, criarAto } from './controllers/atosController';
 import { errorHandler } from './middleware/errorHandler';
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/escolas', escolasRoutes);
 app.use('/api/atos', atosRoutes);
+app.use('/api/pareceres', pareceresRoutes);
 
 // Rotas de atos vinculadas a escolas
 app.get('/api/escolas/:escolaId/atos', authenticateToken, listarAtos);
@@ -50,6 +52,18 @@ app.get('/escola-detalhe.html', (req, res) => {
 
 app.get('/ato-form.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/ato-form.html'));
+});
+
+app.get('/pareceres.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/pareceres.html'));
+});
+
+app.get('/parecer-form.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/parecer-form.html'));
+});
+
+app.get('/parecer-view.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/parecer-view.html'));
 });
 
 app.get('/login.html', (req, res) => {
