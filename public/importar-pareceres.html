@@ -391,6 +391,9 @@
             left: 0;
             right: 0;
             background: white;
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
             border: 1px solid #ddd;
             border-radius: 6px;
             max-height: 200px;
@@ -747,52 +750,82 @@
         
         let timeoutBusca = null;
         async function buscarEscolas(id, nome) {
+            console.log('[BUSCAR ESCOLAS]', { id, nome });
             clearTimeout(timeoutBusca);
             
+            const sugestoesDiv = document.getElementById(`sugestoes-escola-${id}`);
+            if (!sugestoesDiv) {
+                console.error('[BUSCAR ESCOLAS] Elemento sugestoes-escola não encontrado!');
+                return;
+            }
+            
             if (!nome || nome.length < 2) {
-                document.getElementById(`sugestoes-escola-${id}`).style.display = 'none';
+                sugestoesDiv.style.display = 'none';
+                sugestoesDiv.innerHTML = '';
                 return;
             }
             
             timeoutBusca = setTimeout(async () => {
                 try {
+                    console.log('[BUSCAR ESCOLAS] Fazendo requisição...');
                     const response = await fetch(`${API_URL}/importacao/buscar-escolas?nome=${encodeURIComponent(nome)}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
                     });
                     
-                    if (!response.ok) return;
+                    console.log('[BUSCAR ESCOLAS] Resposta:', response.status, response.statusText);
+                    
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        console.error('[BUSCAR ESCOLAS] Erro na resposta:', error);
+                        return;
+                    }
                     
                     const data = await response.json();
-                    exibirSugestoesEscola(id, data.escolas);
+                    console.log('[BUSCAR ESCOLAS] Escolas encontradas:', data.escolas?.length || 0);
+                    exibirSugestoesEscola(id, data.escolas || []);
                 } catch (error) {
-                    console.error('Erro ao buscar escolas:', error);
+                    console.error('[BUSCAR ESCOLAS] Erro ao buscar escolas:', error);
                 }
             }, 300);
         }
         
         function exibirSugestoesEscola(id, escolas) {
+            console.log('[EXIBIR SUGESTOES]', { id, quantidade: escolas.length });
             const sugestoesDiv = document.getElementById(`sugestoes-escola-${id}`);
+            
+            if (!sugestoesDiv) {
+                console.error('[EXIBIR SUGESTOES] Elemento não encontrado!');
+                return;
+            }
             
             if (escolas.length === 0) {
                 sugestoesDiv.style.display = 'none';
+                sugestoesDiv.innerHTML = '';
                 return;
             }
             
             sugestoesDiv.innerHTML = escolas.map(escola => {
                 // Escapar aspas e caracteres especiais para evitar problemas no onclick
-                const nomeEscolaEscapado = escola.nomeOficial.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-                const escolaIdEscapado = escola.id.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                const nomeEscolaEscapado = (escola.nomeOficial || '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                const escolaIdEscapado = (escola.id || '').replace(/'/g, "&#39;").replace(/"/g, "&quot;");
                 return `
                     <div class="sugestao-escola-item" onclick="window.selecionarEscola('${id}', '${escolaIdEscapado}', '${nomeEscolaEscapado}')">
-                        <strong>${escola.nomeOficial}</strong>
+                        <strong>${escola.nomeOficial || 'Sem nome'}</strong>
                         ${escola.municipio ? `<br><small>${escola.municipio}</small>` : ''}
                     </div>
                 `;
             }).join('');
             
             sugestoesDiv.style.display = 'block';
+            console.log('[EXIBIR SUGESTOES] Sugestões exibidas, display:', sugestoesDiv.style.display);
         }
         
         function selecionarEscola(id, escolaId, nomeEscola) {
