@@ -365,8 +365,9 @@
         
         // Carregar informações do usuário na navbar
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        if (user.email) {
-            document.getElementById('nav-user-name').textContent = user.email;
+        const navUserName = document.getElementById('nav-user-name');
+        if (user.email && navUserName) {
+            navUserName.textContent = user.email;
         }
         
         // Verificar permissões - bloquear acesso de perfil consulta
@@ -406,12 +407,18 @@
                 const data = await response.json();
                 const select = document.getElementById('escolaId');
                 
+                if (!select) {
+                    console.error('Select de escolas não encontrado');
+                    return;
+                }
+                
                 // Limpar opções existentes (exceto a primeira placeholder)
                 while (select.children.length > 1) {
                     select.removeChild(select.lastChild);
                 }
                 
                 if (data.escolas && data.escolas.length > 0) {
+                    console.log(`Carregando ${data.escolas.length} escolas no select`);
                     data.escolas.forEach(escola => {
                         const option = document.createElement('option');
                         option.value = escola.id;
@@ -419,6 +426,7 @@
                         select.appendChild(option);
                     });
                 } else {
+                    console.warn('Nenhuma escola encontrada');
                     // Se não houver escolas, mostrar mensagem
                     const option = document.createElement('option');
                     option.value = '';
