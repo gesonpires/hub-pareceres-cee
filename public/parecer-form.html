@@ -294,31 +294,36 @@
         <form id="parecer-form" onsubmit="salvarParecer(event)">
             <div class="form-group">
                 <label>Escola <span class="required">*</span></label>
-                <select id="escolaId" required>
+                <select id="escolaId">
                     <option value="">Selecione uma escola...</option>
                 </select>
+                <span id="error-escolaId" class="error"></span>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label>Número do Parecer <span class="required">*</span></label>
-                    <input type="number" id="numeroParecer" required min="1">
+                    <input type="number" id="numeroParecer" min="1">
+                    <span id="error-numeroParecer" class="error"></span>
                 </div>
                 
                 <div class="form-group">
                     <label>Ano do Parecer <span class="required">*</span></label>
-                    <input type="number" id="anoParecer" required min="1900" max="2100" value="2024">
+                    <input type="number" id="anoParecer" min="1900" max="2100" value="2024">
+                    <span id="error-anoParecer" class="error"></span>
                 </div>
             </div>
             
             <div class="form-group">
                 <label>Data do Parecer <span class="required">*</span></label>
-                <input type="date" id="dataParecer" required>
+                <input type="date" id="dataParecer">
+                <span id="error-dataParecer" class="error"></span>
             </div>
             
             <div class="form-group">
                 <label>Ementa <span class="required">*</span></label>
-                <textarea id="ementa" required placeholder="Descreva a ementa do parecer"></textarea>
+                <textarea id="ementa" placeholder="Descreva a ementa do parecer"></textarea>
+                <span id="error-ementa" class="error"></span>
             </div>
             
             <div class="form-group">
@@ -589,8 +594,66 @@
             });
         }
         
+        function validarFormulario() {
+            let isValid = true;
+            const camposObrigatorios = [
+                { id: 'escolaId', nome: 'Escola' },
+                { id: 'numeroParecer', nome: 'Número do parecer' },
+                { id: 'anoParecer', nome: 'Ano do parecer' },
+                { id: 'dataParecer', nome: 'Data do parecer' },
+                { id: 'ementa', nome: 'Ementa' }
+            ];
+            const camposFaltantes = [];
+            
+            // Limpar erros anteriores
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            document.getElementById('error-message').style.display = 'none';
+            
+            camposObrigatorios.forEach(campo => {
+                const input = document.getElementById(campo.id);
+                if (input) {
+                    const valor = input.value ? input.value.trim() : '';
+                    if (!valor) {
+                        isValid = false;
+                        input.classList.add('field-error');
+                        const errorElement = document.getElementById(`error-${campo.id}`);
+                        if (errorElement) {
+                            errorElement.textContent = 'Este campo é obrigatório.';
+                        }
+                        camposFaltantes.push(campo.nome);
+                    }
+                }
+            });
+            
+            if (!isValid) {
+                const errorDiv = document.getElementById('error-message');
+                let html = '<strong>Por favor, preencha todos os campos obrigatórios:</strong><ul>';
+                camposFaltantes.forEach(campo => {
+                    html += `<li>${campo}</li>`;
+                });
+                html += '</ul>';
+                errorDiv.innerHTML = html;
+                errorDiv.style.display = 'block';
+                
+                // Rolar para o primeiro campo com erro e focar
+                const firstErrorField = document.querySelector('.field-error');
+                if (firstErrorField) {
+                    firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstErrorField.focus();
+                }
+            }
+            
+            return isValid;
+        }
+        
         async function salvarParecer(event) {
             event.preventDefault();
+            
+            // Validar formulário antes de enviar
+            if (!validarFormulario()) {
+                return;
+            }
             
             const dados = {
                 escolaId: document.getElementById('escolaId').value,
