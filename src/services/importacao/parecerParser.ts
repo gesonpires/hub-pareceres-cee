@@ -84,13 +84,20 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
   for (const pattern of ementaPatterns) {
     const match = texto.match(pattern);
     if (match && match[1]) {
-      // Pegar até 800 caracteres após a palavra-chave
+      // Pegar até 1000 caracteres após a palavra-chave (mais para OBJETO)
       let ementa = match[1].trim();
       // Remover quebras de linha excessivas e normalizar espaços
       ementa = ementa.replace(/\s+/g, ' ').trim();
-      // Limitar tamanho
-      if (ementa.length > 800) {
-        ementa = ementa.substring(0, 800) + '...';
+      // Limitar tamanho (OBJETO pode ser mais longo)
+      const limite = pattern.source.includes('objeto') ? 1000 : 800;
+      if (ementa.length > limite) {
+        // Tentar pegar até o próximo título ou seção
+        const proximoTitulo = ementa.search(/\n\s*(?:RELAT[ÓO]RIO|VOTO|DECIS[ÃA]O|CONSIDERANDO|RESOLU[ÇC][ÃA]O)/i);
+        if (proximoTitulo > 0 && proximoTitulo < limite) {
+          ementa = ementa.substring(0, proximoTitulo).trim();
+        } else {
+          ementa = ementa.substring(0, limite) + '...';
+        }
       }
       if (ementa.length >= 20) { // Só aceitar se tiver pelo menos 20 caracteres
         dados.ementa = ementa;
@@ -104,7 +111,7 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
     const linhas = texto.split(/\n+/).filter(linha => linha.trim().length > 20);
     if (linhas.length > 0) {
       const primeiraLinha = linhas[0].trim().replace(/\s+/g, ' ');
-      if (primeiraLinha.length >= 20 && primeiraLinha.length <= 800) {
+      if (primeiraLinha.length >= 20 && primeiraLinha.length <= 1000) {
         dados.ementa = primeiraLinha;
       }
     }
