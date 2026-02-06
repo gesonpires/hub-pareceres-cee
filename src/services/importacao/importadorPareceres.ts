@@ -59,56 +59,8 @@ export async function processarArquivo(
       throw new Error('Não foi possível extrair texto do arquivo. O arquivo pode estar corrompido ou ser uma imagem escaneada.');
     }
 
-    // Parsear texto para sugerir dados
-    let dadosSugeridos = parsearParecer(textoExtraido);
-    
-    // Se não encontrou número/ano no texto, tentar extrair do nome do arquivo
-    // Padrão: CEE_SC_XXX_YYYY
-    if (!dadosSugeridos.numeroParecer || !dadosSugeridos.anoParecer) {
-      const nomeMatch = nomeArquivo.match(/cee[_\s\/]*sc[_\s]*(\d+)[_\s]*(\d{4})/i);
-      if (nomeMatch) {
-        const numero = parseInt(nomeMatch[1]);
-        const ano = parseInt(nomeMatch[2]);
-        if (numero > 0 && ano >= 2000 && ano <= 2100) {
-          dadosSugeridos.numeroParecer = numero;
-          dadosSugeridos.anoParecer = ano;
-        }
-      }
-    }
-    
-    // Tentar extrair nome da escola do nome do arquivo se não encontrou no texto
-    // Padrão comum: ..._NomeEscola_Cidade.pdf
-    // Mas evitar pegar parte do OBJETO (ex: "SED Autorização do Curso...")
-    if (!dadosSugeridos.escolaNome) {
-      // Remover extensão e padrão CEE_SC_XXX_YYYY do início
-      const nomeLimpo = nomeArquivo
-        .replace(/\.(pdf|docx?)$/i, '')
-        .replace(/^parecer\s*cee[_\s\/]*sc[_\s]*\d+[_\s]*\d{4}[_\s]*/i, '')
-        .replace(/^cee[_\s\/]*sc[_\s]*\d+[_\s]*\d{4}[_\s]*/i, '');
-      
-      // Remover prefixos comuns que não são nomes de escola
-      const nomeSemPrefixo = nomeLimpo
-        .replace(/^(sed|sed\/sc|secretaria)[_\s]*/i, '')
-        .replace(/^(autoriza[çc][ãa]o|credenciamento|recredenciamento)[_\s]*do[_\s]*(curso|estabelecimento)[_\s]*/i, '');
-      
-      // Tentar extrair nome da escola (geralmente antes da última parte que é a cidade)
-      const partes = nomeSemPrefixo.split(/[_\s]+/);
-      if (partes.length >= 2) {
-        // Pegar todas as partes exceto a última (que geralmente é a cidade)
-        const possivelEscola = partes.slice(0, -1).join(' ');
-        // Validar que não é parte do objeto (não contém palavras-chave de curso)
-        if (possivelEscola.length > 5 && 
-            possivelEscola.length < 200 &&
-            !possivelEscola.match(/^(autoriza|credenciamento|curso|t[ée]cnico|n[íi]vel|m[ée]dio)/i)) {
-          dadosSugeridos.escolaNome = possivelEscola;
-        }
-      } else if (partes.length === 1 && 
-                 partes[0].length > 5 && 
-                 partes[0].length < 200 &&
-                 !partes[0].match(/^(autoriza|credenciamento|curso|t[ée]cnico|n[íi]vel|m[ée]dio)/i)) {
-        dadosSugeridos.escolaNome = partes[0];
-      }
-    }
+    // Parsear apenas para extrair número/ano do nome do arquivo
+    const dadosSugeridos = parsearParecer(textoExtraido, nomeArquivo);
 
     return {
       nomeArquivo,
