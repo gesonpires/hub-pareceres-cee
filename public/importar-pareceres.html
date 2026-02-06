@@ -895,26 +895,39 @@
             });
             
             // Validação
+            const escolaBuscaElement = document.getElementById(`escola-busca-${id}`);
+            const nomeEscolaDigitado = escolaBuscaElement ? escolaBuscaElement.value.trim() : '';
+            
             if (!escolaId || !numeroParecer || !anoParecer || !dataParecer || !ementa) {
                 const camposFaltantes = [];
-                if (!escolaId) camposFaltantes.push('Escola (selecione uma escola da lista de sugestões)');
+                if (!escolaId) {
+                    if (nomeEscolaDigitado) {
+                        camposFaltantes.push(`Escola: "${nomeEscolaDigitado}" não está cadastrada. Por favor, cadastre a escola primeiro ou selecione uma escola existente da lista de sugestões.`);
+                    } else {
+                        camposFaltantes.push('Escola (digite o nome e selecione da lista de sugestões)');
+                    }
+                }
                 if (!numeroParecer) camposFaltantes.push('Número do Parecer');
                 if (!anoParecer) camposFaltantes.push('Ano do Parecer');
                 if (!dataParecer) camposFaltantes.push('Data do Parecer');
                 if (!ementa) camposFaltantes.push('Ementa');
                 
-                mostrarErro(`Por favor, preencha todos os campos obrigatórios:\n${camposFaltantes.join('\n')}`);
+                let mensagemErro = `Por favor, preencha todos os campos obrigatórios:\n${camposFaltantes.join('\n')}`;
+                
+                // Se escola não está cadastrada, adicionar link para cadastrar
+                if (!escolaId && nomeEscolaDigitado) {
+                    mensagemErro += `\n\n<a href="/escola-form.html" target="_blank" style="color: #0066cc; text-decoration: underline;">Clique aqui para cadastrar a escola "${nomeEscolaDigitado}"</a>`;
+                }
+                
+                mostrarErro(mensagemErro);
                 
                 // Destacar campo de escola se estiver vazio
-                if (!escolaId) {
-                    const escolaBuscaElement = document.getElementById(`escola-busca-${id}`);
-                    if (escolaBuscaElement) {
-                        escolaBuscaElement.style.borderColor = '#dc3545';
-                        escolaBuscaElement.focus();
-                        setTimeout(() => {
-                            escolaBuscaElement.style.borderColor = '';
-                        }, 3000);
-                    }
+                if (!escolaId && escolaBuscaElement) {
+                    escolaBuscaElement.style.borderColor = '#dc3545';
+                    escolaBuscaElement.focus();
+                    setTimeout(() => {
+                        escolaBuscaElement.style.borderColor = '';
+                    }, 5000);
                 }
                 
                 return;
