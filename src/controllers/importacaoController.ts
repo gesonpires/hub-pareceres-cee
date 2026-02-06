@@ -50,17 +50,10 @@ export const uploadArquivos = [
           
           // Garantir que textoExtraido seja string antes de armazenar
           let textoExtraidoString = '';
-          console.log(`[DEBUG] Tipo de textoExtraido: ${typeof resultado.textoExtraido}`);
-          console.log(`[DEBUG] É string? ${typeof resultado.textoExtraido === 'string'}`);
-          console.log(`[DEBUG] É Promise? ${resultado.textoExtraido && typeof resultado.textoExtraido.then === 'function'}`);
-          console.log(`[DEBUG] É objeto? ${resultado.textoExtraido && typeof resultado.textoExtraido === 'object'}`);
-          
           if (typeof resultado.textoExtraido === 'string') {
             textoExtraidoString = resultado.textoExtraido;
-            console.log(`[DEBUG] Texto extraído (primeiros 100 chars): ${textoExtraidoString.substring(0, 100)}`);
           } else if (resultado.textoExtraido && typeof resultado.textoExtraido.then === 'function') {
             // Se for Promise, aguardar (não deveria acontecer)
-            console.error('textoExtraido é uma Promise no resultado!');
             textoExtraidoString = await resultado.textoExtraido;
             // Garantir que ainda é string após await
             if (typeof textoExtraidoString !== 'string') {
@@ -68,7 +61,6 @@ export const uploadArquivos = [
             }
           } else if (resultado.textoExtraido && typeof resultado.textoExtraido === 'object') {
             // Se for objeto, tentar converter
-            console.warn('textoExtraido é um objeto no resultado! Tentando converter...', Object.keys(resultado.textoExtraido));
             try {
               textoExtraidoString = JSON.stringify(resultado.textoExtraido);
             } catch (e) {
@@ -78,9 +70,7 @@ export const uploadArquivos = [
             textoExtraidoString = String(resultado.textoExtraido || '');
           }
           
-          console.log(`[DEBUG] Texto final (tipo: ${typeof textoExtraidoString}, tamanho: ${textoExtraidoString.length})`);
-          
-          // Criar objeto limpo para armazenar (sem spread para evitar problemas)
+          // Criar objeto limpo para armazenar
           const arquivoProcessado: any = {
             id: id,
             nomeArquivo: resultado.nomeArquivo,
@@ -91,13 +81,7 @@ export const uploadArquivos = [
             uploadedAt: new Date().toISOString()
           };
           
-          // Verificar antes de armazenar
-          console.log(`[DEBUG] Antes de armazenar - tipo textoExtraido: ${typeof arquivoProcessado.textoExtraido}`);
           arquivosProcessados.set(id, arquivoProcessado);
-          
-          // Verificar após armazenar
-          const arquivoArmazenado = arquivosProcessados.get(id);
-          console.log(`[DEBUG] Após armazenar - tipo textoExtraido: ${typeof arquivoArmazenado?.textoExtraido}`);
 
           return {
             id,
