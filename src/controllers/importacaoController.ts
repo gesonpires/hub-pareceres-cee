@@ -85,7 +85,15 @@ export const obterPreview = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Arquivo não encontrado' });
     }
 
-    res.json(arquivo);
+    // Garantir que textoExtraido seja string
+    const arquivoSerializado = {
+      ...arquivo,
+      textoExtraido: typeof arquivo.textoExtraido === 'string' 
+        ? arquivo.textoExtraido 
+        : String(arquivo.textoExtraido || '')
+    };
+
+    res.json(arquivoSerializado);
   } catch (error: any) {
     console.error('Erro ao obter preview:', error);
     res.status(500).json({ error: error.message || 'Erro ao obter preview' });

@@ -696,7 +696,9 @@
                     
                     <div class="form-group full-width">
                         <label>Texto Extraído (referência)</label>
-                        <div class="texto-extraido">${arquivo.textoExtraido.substring(0, 2000)}${arquivo.textoExtraido.length > 2000 ? '...' : ''}</div>
+                        <div class="texto-extraido">${typeof arquivo.textoExtraido === 'string' 
+                            ? (arquivo.textoExtraido.substring(0, 2000) + (arquivo.textoExtraido.length > 2000 ? '...' : ''))
+                            : 'Texto não disponível'}</div>
                     </div>
                     
                     <div class="form-group full-width" style="margin-top: 16px;">

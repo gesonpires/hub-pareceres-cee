@@ -21,20 +21,26 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
 
   // Tentar extrair número e ano do parecer
   // Padrões: "Parecer Nº 123/2024", "Parecer nº 123/2024", "Parecer 123/2024", etc.
-  const parecerMatch = textoNormalizado.match(
-    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s*\/\s*(\d{4})/i
-  );
-  if (parecerMatch) {
-    dados.numeroParecer = parseInt(parecerMatch[1]);
-    dados.anoParecer = parseInt(parecerMatch[2]);
-  } else {
-    // Tentar padrão alternativo: "Parecer 123 de 2024"
-    const parecerAltMatch = textoNormalizado.match(
-      /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s+(?:de\s+)?(\d{4})/i
-    );
-    if (parecerAltMatch) {
-      dados.numeroParecer = parseInt(parecerAltMatch[1]);
-      dados.anoParecer = parseInt(parecerAltMatch[2]);
+  // Também: "CEE_SC_013_2025", "CEE/SC 013/2025", etc.
+  const parecerPatterns = [
+    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s*\/\s*(\d{4})/i,
+    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s+(?:de\s+)?(\d{4})/i,
+    /cee[_\s\/]*sc[_\s]*(\d+)[_\s]*(\d{4})/i,
+    /parecer\s*cee[_\s\/]*sc[_\s]*(\d+)[_\s]*(\d{4})/i,
+    /(\d{3,4})\s*\/\s*(\d{4})/,
+    /n[º°]?\s*(\d+)\s*\/\s*(\d{4})/i
+  ];
+
+  for (const pattern of parecerPatterns) {
+    const match = textoNormalizado.match(pattern);
+    if (match) {
+      const numero = parseInt(match[1]);
+      const ano = parseInt(match[2]);
+      if (numero > 0 && ano >= 2000 && ano <= 2100) {
+        dados.numeroParecer = numero;
+        dados.anoParecer = ano;
+        break;
+      }
     }
   }
 
@@ -66,44 +72,67 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
 
   // Tentar extrair ementa
   // Padrões: "Ementa:", "E M E N T A", etc.
+  // Também procurar por parágrafos após palavras-chave
   const ementaPatterns = [
-    /(?:ementa|e\s*m\s*e\s*n\s*t\s*a)[\s:]*([^\n]{50,500})/i,
-    /(?:resumo|objeto)[\s:]*([^\n]{50,500})/i
+    /(?:ementa|e\s*m\s*e\s*n\s*t\s*a)[\s:]*([^\n]{50,800})/i,
+    /(?:resumo|objeto)[\s:]*([^\n]{50,800})/i,
+    /(?:sobre|trata[\s-]?se|referente)[\s:]*([^\n]{50,800})/i
   ];
 
   for (const pattern of ementaPatterns) {
-    const match = textoNormalizado.match(pattern);
+    const match = texto.match(pattern);
     if (match && match[1]) {
-      // Pegar até 500 caracteres após "Ementa:"
+      // Pegar até 800 caracteres após a palavra-chave
       let ementa = match[1].trim();
-      // Limitar tamanho e remover quebras de linha excessivas
-      if (ementa.length > 500) {
-        ementa = ementa.substring(0, 500) + '...';
+      // Remover quebras de linha excessivas e normalizar espaços
+      ementa = ementa.replace(/\s+/g, ' ').trim();
+      // Limitar tamanho
+      if (ementa.length > 800) {
+        ementa = ementa.substring(0, 800) + '...';
       }
-      dados.ementa = ementa.replace(/\s+/g, ' ').trim();
-      break;
+      if (ementa.length >= 20) { // Só aceitar se tiver pelo menos 20 caracteres
+        dados.ementa = ementa;
+        break;
+      }
+    }
+  }
+  
+  // Se não encontrou ementa específica, tentar pegar o primeiro parágrafo significativo
+  if (!dados.ementa) {
+    const linhas = texto.split(/\n+/).filter(linha => linha.trim().length > 20);
+    if (linhas.length > 0) {
+      const primeiraLinha = linhas[0].trim().replace(/\s+/g, ' ');
+      if (primeiraLinha.length >= 20 && primeiraLinha.length <= 800) {
+        dados.ementa = primeiraLinha;
+      }
     }
   }
 
   // Tentar extrair nome da escola
-  // Padrões: "Escola:", "Instituição:", "Estabelecimento:", etc.
+  // Padrões: "Escola:", "Instituição:", "Estabelecimento:", "Colegio", etc.
   const escolaPatterns = [
-    /(?:escola|institui[çc][ãa]o|estabelecimento)[\s:]*([^\n]{10,200})/i,
-    /(?:denomina[çc][ãa]o)[\s:]*([^\n]{10,200})/i
+    /(?:escola|institui[çc][ãa]o|estabelecimento|colegio|col[ée]gio)[\s:]*([^\n]{10,200})/i,
+    /(?:denomina[çc][ãa]o)[\s:]*([^\n]{10,200})/i,
+    /(?:requerente|requerido)[\s:]*([^\n]{10,200})/i
   ];
 
   for (const pattern of escolaPatterns) {
-    const match = textoNormalizado.match(pattern);
+    const match = texto.match(pattern);
     if (match && match[1]) {
       let escolaNome = match[1].trim();
-      // Pegar até o primeiro ponto, vírgula ou quebra de linha
-      escolaNome = escolaNome.split(/[.,;\n]/)[0].trim();
+      // Pegar até o primeiro ponto, vírgula, quebra de linha ou palavra-chave
+      escolaNome = escolaNome.split(/[.,;\n]|(?:munic[ií]pio|cnpj|codigo)/i)[0].trim();
+      // Remover espaços excessivos
+      escolaNome = escolaNome.replace(/\s+/g, ' ').trim();
       if (escolaNome.length > 5 && escolaNome.length < 200) {
         dados.escolaNome = escolaNome;
         break;
       }
     }
   }
+  
+  // Se não encontrou, tentar extrair do nome do arquivo (se disponível)
+  // Isso será feito no importadorPareceres se necessário
 
   return dados;
 }
