@@ -6,6 +6,7 @@ import {
   obterParecer,
   atualizarParecer,
 } from '../controllers/pareceresController';
+import { gerarTextoAtosParecer } from '../controllers/geracaoTextoAtosController';
 
 const router = express.Router();
 
@@ -23,5 +24,8 @@ router.post('/', requirePerfil(['edicao']), criarParecer);
 
 // PUT /pareceres/:id - Apenas perfil edicao
 router.put('/:id', requirePerfil(['edicao']), atualizarParecer);
+
+// POST /pareceres/:id/gerar-texto-atos - Gerar texto de atos (permitido para todos autenticados)
+router.post('/:id/gerar-texto-atos', authenticateToken, gerarTextoAtosParecer);
 
 export default router;

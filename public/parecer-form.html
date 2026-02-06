@@ -353,22 +353,52 @@
                 return;
             }
             
+            if (!parecerId) {
+                mostrarErro('Salve o parecer antes de gerar o texto.');
+                return;
+            }
+            
             try {
                 document.getElementById('btn-gerar').disabled = true;
                 document.getElementById('btn-gerar').textContent = 'Gerando...';
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('warning-message').style.display = 'none';
                 
-                // Por enquanto, apenas simular - a geração real será implementada na Fase G
-                mostrarWarning('A geração do texto "ATOS AUTORIZATIVOS" será implementada na Fase G. Por enquanto, este é um placeholder.');
+                const response = await fetch(`${API_URL}/pareceres/${parecerId}/gerar-texto-atos`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ escolaId })
+                });
                 
-                // TODO: Implementar chamada para endpoint de geração na Fase G
-                // const response = await fetch(`${API_URL}/pareceres/${parecerId || 'new'}/gerar-texto-atos`, {
-                //     method: 'POST',
-                //     headers: {
-                //         'Authorization': `Bearer ${token}`,
-                //         'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify({ escolaId })
-                // });
+                const result = await response.json();
+                
+                if (response.ok && result.sucesso) {
+                    textoAtosGerado = result.textoGerado;
+                    document.getElementById('texto-atos').textContent = result.textoGerado;
+                    document.getElementById('texto-atos').classList.remove('texto-vazio');
+                    document.getElementById('btn-copiar').disabled = false;
+                    mostrarSucesso('Texto gerado com sucesso!');
+                } else if (result.bloqueado) {
+                    // Exibir mensagem de bloqueio detalhada
+                    let mensagemErro = `⚠️ ${result.error}\n\n${result.mensagem}`;
+                    
+                    if (result.atosIncompletos && result.atosIncompletos.length > 0) {
+                        mensagemErro += '\n\n**Atos com dados incompletos:**\n';
+                        result.atosIncompletos.forEach((ato: any) => {
+                            mensagemErro += `- ${ato.tipoAto} Nº${ato.numeroAto} de ${ato.dataPublicacao} — faltam: ${ato.camposFaltantes.join(', ')}\n`;
+                        });
+                    }
+                    
+                    mostrarErro(mensagemErro);
+                    document.getElementById('texto-atos').textContent = 'Não foi possível gerar o texto devido a erros de validação.';
+                    document.getElementById('texto-atos').classList.add('texto-vazio');
+                    document.getElementById('btn-copiar').disabled = true;
+                } else {
+                    mostrarErro(result.error || 'Erro ao gerar texto');
+                }
                 
                 document.getElementById('btn-gerar').disabled = false;
                 document.getElementById('btn-gerar').textContent = 'Gerar/Atualizar texto';
@@ -449,9 +479,17 @@
                         parecerId = result.id;
                     }
                     mostrarSucesso(parecerId ? 'Parecer atualizado com sucesso!' : 'Parecer criado com sucesso!');
-                    setTimeout(() => {
-                        window.location.href = `/parecer-view.html?id=${result.id}`;
-                    }, 1500);
+                    
+                    // Se já havia texto gerado, recarregar para manter
+                    if (textoAtosGerado) {
+                        setTimeout(() => {
+                            carregarParecer(result.id);
+                        }, 500);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = `/parecer-view.html?id=${result.id}`;
+                        }, 1500);
+                    }
                 } else {
                     mostrarErro(result.error || 'Erro ao salvar parecer');
                 }
@@ -462,7 +500,8 @@
         
         function mostrarErro(mensagem) {
             const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = mensagem;
+            // Suportar quebras de linha e formatação
+            errorDiv.innerHTML = mensagem.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             errorDiv.style.display = 'block';
         }
         
