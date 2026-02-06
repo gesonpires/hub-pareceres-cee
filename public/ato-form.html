@@ -373,6 +373,11 @@
         if (atoId) {
             document.getElementById('titulo').textContent = 'Editar Ato Autorizativo';
             carregarAto(atoId);
+            // Ocultar botão "Criar Outro Ato" em modo de edição
+            document.getElementById('btn-criar-outro').style.display = 'none';
+        } else {
+            // Em modo de criação, ocultar botão inicialmente
+            document.getElementById('btn-criar-outro').style.display = 'none';
         }
         
         async function carregarAto(id) {
@@ -523,9 +528,25 @@
                 
                 if (response.ok) {
                     mostrarSucesso(atoId ? 'Ato atualizado com sucesso!' : 'Ato criado com sucesso!');
-                    setTimeout(() => {
-                        window.location.href = `/escola-detalhe.html?id=${escolaId}`;
-                    }, 1500);
+                    
+                    if (atoId) {
+                        // Se for edição, redirecionar após 1.5s
+                        setTimeout(() => {
+                            window.location.href = `/escola-detalhe.html?id=${escolaId}`;
+                        }, 1500);
+                    } else {
+                        // Se for criação, limpar formulário e permitir criar outro
+                        limparFormulario();
+                        // Mostrar botão "Criar Outro Ato" temporariamente
+                        const btnCriarOutro = document.getElementById('btn-criar-outro');
+                        btnCriarOutro.style.display = 'inline-block';
+                        // Scroll para o topo
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // Focar no primeiro campo
+                        setTimeout(() => {
+                            document.getElementById('tipoAto').focus();
+                        }, 100);
+                    }
                 } else {
                     // Mostrar erros de validação
                     if (result.camposFaltantes && result.camposFaltantes.length > 0) {
@@ -581,6 +602,18 @@
             const successDiv = document.getElementById('success-message');
             successDiv.textContent = mensagem;
             successDiv.style.display = 'block';
+        }
+        
+        function limparFormulario() {
+            document.getElementById('ato-form').reset();
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            
+            // Resetar valores específicos
+            document.getElementById('tipoAto').value = '';
+            document.getElementById('statusVigencia').value = '';
         }
         
         function voltar() {
