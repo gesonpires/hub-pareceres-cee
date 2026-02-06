@@ -432,6 +432,9 @@
             }
         }
         
+        // Carregar escolas sempre (necessário para select)
+        carregarEscolas();
+        
         if (parecerId) {
             document.getElementById('titulo').textContent = 'Editar Parecer';
             carregarParecer(parecerId);
@@ -654,12 +657,7 @@
             window.location.href = '/pareceres.html';
         }
         
-        // Carregar escolas ao carregar a página
-        if (!parecerId) {
-            carregarEscolas();
-        }
-        
-        // Definir data padrão como hoje
+        // Definir data padrão como hoje (apenas para novo parecer)
         if (!parecerId) {
             document.getElementById('dataParecer').valueAsDate = new Date();
         }
