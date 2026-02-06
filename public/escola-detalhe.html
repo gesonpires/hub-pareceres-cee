@@ -509,6 +509,29 @@
         </div>
     </div>
     
+    <!-- Modal de confirmação de exclusão -->
+    <div id="modal-confirmacao" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-title">
+                <span class="modal-icon">⚠️</span>
+                <span>Confirmar Exclusão</span>
+            </div>
+            <div class="modal-message" id="modal-message">
+                Tem certeza que deseja excluir este ato autorizativo? Esta ação não pode ser desfeita.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="fecharModal()">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="btn-confirmar-exclusao">Excluir</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alerta de sucesso -->
+    <div id="success-alert" class="success-alert">
+        <span class="success-alert-icon">✅</span>
+        <span class="success-alert-message" id="success-alert-message">Ato excluído com sucesso!</span>
+    </div>
+    
     <script>
         const API_URL = 'http://localhost:3000/api';
         let token = localStorage.getItem('token');
