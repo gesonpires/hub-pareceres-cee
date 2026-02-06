@@ -29,7 +29,8 @@
         
         h1 {
             color: #333;
-            margin-bottom: 24px;
+            margin: 0;
+            font-size: 28px;
         }
         
         .header {
@@ -37,6 +38,27 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .header-subtitle {
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
         
         .btn {
@@ -201,8 +223,13 @@
     
     <div class="container">
         <div class="header">
-            <h1>Escolas</h1>
-            <button class="btn btn-primary" id="btn-nova-escola" onclick="abrirFormulario()" style="display: none;">+ Nova Escola</button>
+            <div class="header-info">
+                <h1>Escolas</h1>
+                <p class="header-subtitle" id="header-subtitle">Gerenciar escolas cadastradas no sistema</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="btn-nova-escola" onclick="abrirFormulario()" style="display: none;">+ Nova Escola</button>
+            </div>
         </div>
         
         <div id="error-message" class="error" style="display: none;"></div>
@@ -286,6 +313,7 @@
                 document.getElementById('escolas-container').style.display = 'none';
                 document.getElementById('empty').style.display = 'none';
                 document.getElementById('error-message').style.display = 'none';
+                document.getElementById('header-subtitle').textContent = 'Carregando...';
                 
                 const params = new URLSearchParams();
                 const nome = document.getElementById('filter-nome').value;
@@ -319,8 +347,10 @@
                 if (data.escolas && data.escolas.length > 0) {
                     document.getElementById('escolas-container').style.display = 'block';
                     renderizarEscolas(data.escolas);
+                    atualizarHeaderSubtitle(data.escolas.length, data.total || data.escolas.length);
                 } else {
                     document.getElementById('empty').style.display = 'block';
+                    atualizarHeaderSubtitle(0, 0);
                 }
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
@@ -364,6 +394,17 @@
             
             if (podeEditar) {
                 document.getElementById('btn-nova-escola').style.display = 'inline-block';
+            }
+        }
+        
+        function atualizarHeaderSubtitle(exibidas, total) {
+            const subtitleEl = document.getElementById('header-subtitle');
+            if (total === 0) {
+                subtitleEl.textContent = 'Nenhuma escola cadastrada';
+            } else if (exibidas === total) {
+                subtitleEl.textContent = `${total} ${total === 1 ? 'escola cadastrada' : 'escolas cadastradas'}`;
+            } else {
+                subtitleEl.textContent = `Exibindo ${exibidas} de ${total} ${total === 1 ? 'escola' : 'escolas'}`;
             }
         }
         
