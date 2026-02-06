@@ -780,12 +780,17 @@
                 return;
             }
             
-            sugestoesDiv.innerHTML = escolas.map(escola => `
-                <div class="sugestao-escola-item" onclick="selecionarEscola('${id}', '${escola.id}', '${escola.nomeOficial.replace(/'/g, "\\'")}')">
-                    <strong>${escola.nomeOficial}</strong>
-                    ${escola.municipio ? `<br><small>${escola.municipio}</small>` : ''}
-                </div>
-            `).join('');
+            sugestoesDiv.innerHTML = escolas.map(escola => {
+                // Escapar aspas e caracteres especiais para evitar problemas no onclick
+                const nomeEscolaEscapado = escola.nomeOficial.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                const escolaIdEscapado = escola.id.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                return `
+                    <div class="sugestao-escola-item" onclick="window.selecionarEscola('${id}', '${escolaIdEscapado}', '${nomeEscolaEscapado}')">
+                        <strong>${escola.nomeOficial}</strong>
+                        ${escola.municipio ? `<br><small>${escola.municipio}</small>` : ''}
+                    </div>
+                `;
+            }).join('');
             
             sugestoesDiv.style.display = 'block';
         }
