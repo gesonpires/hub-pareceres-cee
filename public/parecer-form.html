@@ -661,6 +661,19 @@
         if (!parecerId) {
             document.getElementById('dataParecer').valueAsDate = new Date();
         }
+        
+        // Carregar escolas após DOM estar pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarEscolas();
+        });
+        
+        // Também tentar carregar imediatamente (caso DOM já esteja pronto)
+        if (document.readyState === 'loading') {
+            // DOM ainda não carregou, aguardar DOMContentLoaded
+        } else {
+            // DOM já está pronto, carregar escolas agora
+            carregarEscolas();
+        }
     </script>
 </body>
 </html>
