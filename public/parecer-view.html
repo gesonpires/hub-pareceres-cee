@@ -290,7 +290,13 @@
                     document.getElementById('btn-copiar').disabled = false;
                 }
                 
-                document.getElementById('link-editar').href = `/parecer-form.html?id=${parecer.id}`;
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const podeEditar = user.perfil === 'edicao';
+                
+                if (podeEditar) {
+                    document.getElementById('link-editar').href = `/parecer-form.html?id=${parecer.id}`;
+                    document.getElementById('link-editar').style.display = 'inline-block';
+                }
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('parecer-content').style.display = 'block';
