@@ -371,11 +371,12 @@
             window.location.href = '/403.html';
         }
         
-        function fazerLogout() {
+        // Função de logout (deve estar no escopo global para onclick)
+        window.fazerLogout = function() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login.html';
-        }
+        };
         
         // Verificar se é edição
         const urlParams = new URLSearchParams(window.location.search);
