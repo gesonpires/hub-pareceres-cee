@@ -183,6 +183,21 @@
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/dashboard.html" class="nav-logo">Hub Pareceres CEE</a>
+            <div class="nav-links">
+                <a href="/dashboard.html" class="nav-link">Início</a>
+                <a href="/escolas.html" class="nav-link active">Escolas</a>
+                <a href="/pareceres.html" class="nav-link">Pareceres</a>
+            </div>
+            <div class="nav-user">
+                <span id="nav-user-name">Usuário</span>
+                <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+            </div>
+        </div>
+    </nav>
+    
     <div class="container">
         <div class="header">
             <h1>Escolas</h1>
@@ -249,6 +264,18 @@
         let token = localStorage.getItem('token');
         
         if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Carregar informações do usuário na navbar
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.email) {
+            document.getElementById('nav-user-name').textContent = user.email;
+        }
+        
+        function fazerLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.href = '/login.html';
         }
         
