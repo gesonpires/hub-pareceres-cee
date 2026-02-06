@@ -17,10 +17,9 @@
   - Após login bem-sucedido, redireciona para `/dashboard.html` (não mais `/escolas.html`)
 - ✅ **Fazer logout e login com usuário de perfil `consulta`** - Implementado
   - Usuário de teste: `consulta@cee.sc.gov.br / senha123`
-- ⚠️ **Verificar que botões de criação/edição não aparecem para perfil consulta**
-  - **Status:** Parcialmente implementado
-  - **Observação:** O controle de acesso está implementado no backend (middleware `requirePerfil`), mas os botões não são ocultados no frontend. Quando o usuário tenta criar/editar, recebe erro 403 do backend.
-  - **Recomendação:** Implementar ocultação de botões no frontend baseado no perfil do usuário para melhor UX.
+- ✅ **Verificar que botões de criação/edição não aparecem para perfil consulta**
+  - **Status:** Implementado
+  - **Observação:** Botões são ocultados no frontend baseado no perfil do usuário armazenado no localStorage. Controle de acesso também está garantido no backend.
 
 ---
 
@@ -195,19 +194,16 @@
 
 ---
 
-## Observações e Melhorias Sugeridas
+## Observações e Melhorias Implementadas
 
-### 1. Ocultação de Botões no Frontend ⚠️
-**Prioridade:** Média  
-**Descrição:** Os botões de criação/edição/exclusão não são ocultados para usuários com perfil `consulta`. O controle está apenas no backend, retornando erro 403 quando tentam usar.
+### 1. Ocultação de Botões no Frontend ✅
+**Status:** Implementado  
+**Descrição:** Botões de criação/edição/exclusão agora são ocultados para usuários com perfil `consulta` no frontend, melhorando a experiência do usuário.
 
-**Sugestão:** Adicionar verificação de perfil no frontend para ocultar botões:
-```javascript
-const user = JSON.parse(localStorage.getItem('user') || '{}');
-if (user.perfil === 'consulta') {
-    // Ocultar botões de criação/edição
-}
-```
+**Implementação:**
+- Função `verificarPermissoes()` adicionada em todas as páginas relevantes
+- Botões ocultados via `style.display = 'none'` quando perfil é `consulta`
+- Controle de acesso mantido no backend como camada de segurança adicional
 
 ### 2. Redirecionamento Após Login ✅
 **Status:** Corrigido  
@@ -229,10 +225,10 @@ if (user.perfil === 'consulta') {
 O MVP está completo e pronto para uso. A única melhoria sugerida é a ocultação de botões no frontend para melhor experiência do usuário com perfil `consulta`, mas isso não impede o funcionamento do sistema (o controle de acesso está garantido no backend).
 
 **Próximos passos recomendados:**
-1. Implementar ocultação de botões no frontend (opcional, melhoria de UX)
-2. Executar testes manuais completos em ambiente de homologação
-3. Coletar feedback dos usuários finais
-4. Planejar melhorias para Fase 2 do produto
+1. ✅ Implementar ocultação de botões no frontend - **CONCLUÍDO**
+2. Executar testes manuais completos em ambiente de homologação (usar `docs/09-guia-testes-manuais.md`)
+3. Coletar feedback dos usuários finais (usar `docs/10-template-coleta-feedback.md`)
+4. Planejar melhorias para Fase 2 do produto baseado no feedback
 
 ---
 
