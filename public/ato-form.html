@@ -256,7 +256,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Tipo do Ato <span class="required">*</span></label>
-                    <select id="tipoAto" required>
+                    <select id="tipoAto">
                         <option value="">Selecione...</option>
                         <option value="Parecer">Parecer</option>
                         <option value="Resolução">Resolução</option>
@@ -268,7 +268,7 @@
                 
                 <div class="form-group">
                     <label>Número do Ato <span class="required">*</span></label>
-                    <input type="text" id="numeroAto" required>
+                    <input type="text" id="numeroAto">
                     <div class="error" id="error-numeroAto"></div>
                 </div>
             </div>
@@ -281,14 +281,14 @@
                 
                 <div class="form-group">
                     <label>Data de Publicação <span class="required">*</span></label>
-                    <input type="date" id="dataPublicacao" required>
+                    <input type="date" id="dataPublicacao">
                     <div class="error" id="error-dataPublicacao"></div>
                 </div>
             </div>
             
             <div class="form-group">
                 <label>Órgão Emissor <span class="required">*</span></label>
-                <input type="text" id="orgaoEmissor" required placeholder="Ex: CEE-SC">
+                <input type="text" id="orgaoEmissor" placeholder="Ex: CEE-SC">
                 <div class="error" id="error-orgaoEmissor"></div>
             </div>
             
@@ -311,7 +311,7 @@
             
             <div class="form-group">
                 <label>Status de Vigência <span class="required">*</span></label>
-                <select id="statusVigencia" required>
+                <select id="statusVigencia">
                     <option value="">Selecione...</option>
                     <option value="vigente">Vigente</option>
                     <option value="expirado">Expirado</option>
@@ -322,7 +322,7 @@
             
             <div class="form-group">
                 <label>Observações <span class="required">*</span></label>
-                <textarea id="observacoes" required placeholder="Texto completo das observações do ato autorizativo"></textarea>
+                <textarea id="observacoes" placeholder="Texto completo das observações do ato autorizativo"></textarea>
                 <div class="help-text">Este campo é obrigatório e será usado na geração do texto "ATOS AUTORIZATIVOS"</div>
                 <div class="error" id="error-observacoes"></div>
             </div>
@@ -411,8 +411,73 @@
             }
         }
         
+        function validarFormulario() {
+            const camposObrigatorios = [
+                { id: 'tipoAto', nome: 'Tipo do ato' },
+                { id: 'numeroAto', nome: 'Número do ato' },
+                { id: 'dataPublicacao', nome: 'Data de publicação' },
+                { id: 'orgaoEmissor', nome: 'Órgão emissor' },
+                { id: 'statusVigencia', nome: 'Status de vigência' },
+                { id: 'observacoes', nome: 'Observações' }
+            ];
+            
+            const camposFaltantes = [];
+            
+            camposObrigatorios.forEach(campo => {
+                const elemento = document.getElementById(campo.id);
+                const valor = elemento.value.trim();
+                
+                if (!valor) {
+                    camposFaltantes.push(campo);
+                    elemento.classList.add('field-error');
+                    const errorElement = document.getElementById(`error-${campo.id}`);
+                    if (errorElement) {
+                        errorElement.textContent = 'Este campo é obrigatório';
+                    }
+                } else {
+                    elemento.classList.remove('field-error');
+                    const errorElement = document.getElementById(`error-${campo.id}`);
+                    if (errorElement) {
+                        errorElement.textContent = '';
+                    }
+                }
+            });
+            
+            if (camposFaltantes.length > 0) {
+                const errorDiv = document.getElementById('error-message');
+                let html = '<strong>Por favor, preencha todos os campos obrigatórios:</strong><ul>';
+                camposFaltantes.forEach(campo => {
+                    html += `<li>${campo.nome}</li>`;
+                });
+                html += '</ul>';
+                errorDiv.innerHTML = html;
+                errorDiv.style.display = 'block';
+                
+                // Scroll para o primeiro campo com erro
+                const primeiroCampo = document.getElementById(camposFaltantes[0].id);
+                if (primeiroCampo) {
+                    primeiroCampo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    primeiroCampo.focus();
+                }
+                return false;
+            }
+            
+            return true;
+        }
+        
         async function salvarAto(event) {
             event.preventDefault();
+            
+            // Limpar erros anteriores
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            
+            // Validar formulário antes de enviar
+            if (!validarFormulario()) {
+                return;
+            }
             
             const dados = {
                 tipoAto: document.getElementById('tipoAto').value.trim(),
@@ -426,12 +491,6 @@
                 statusVigencia: document.getElementById('statusVigencia').value,
                 observacoes: document.getElementById('observacoes').value.trim(),
             };
-            
-            // Limpar erros anteriores
-            document.querySelectorAll('.error').forEach(el => el.textContent = '');
-            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('success-message').style.display = 'none';
             
             try {
                 const url = atoId 
