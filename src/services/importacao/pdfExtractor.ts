@@ -12,7 +12,14 @@ export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
     const parser = new PDFParse(uint8Array);
     await parser.load();
     const text = parser.getText();
-    return text || '';
+    // Garantir que retornamos uma string
+    if (typeof text === 'string') {
+      return text;
+    } else if (text && typeof text.toString === 'function') {
+      return text.toString();
+    } else {
+      return String(text || '');
+    }
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
     throw new Error('Erro ao extrair texto do arquivo PDF');
@@ -26,7 +33,14 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
     const parser = new PDFParse(uint8Array);
     await parser.load();
     const text = parser.getText();
-    return text || '';
+    // Garantir que retornamos uma string
+    if (typeof text === 'string') {
+      return text;
+    } else if (text && typeof text.toString === 'function') {
+      return text.toString();
+    } else {
+      return String(text || '');
+    }
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
     throw new Error('Erro ao extrair texto do arquivo PDF');

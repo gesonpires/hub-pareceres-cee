@@ -44,7 +44,8 @@ export async function processarArquivo(
         throw new Error(`Formato de arquivo não suportado: ${extensao}`);
     }
 
-    if (!textoExtraido || textoExtraido.trim().length === 0) {
+    // Garantir que textoExtraido é uma string antes de chamar trim()
+    if (!textoExtraido || typeof textoExtraido !== 'string' || textoExtraido.trim().length === 0) {
       throw new Error('Não foi possível extrair texto do arquivo. O arquivo pode estar corrompido ou ser uma imagem escaneada.');
     }
 
