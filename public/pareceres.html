@@ -108,16 +108,38 @@
             padding: 24px;
         }
         
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 28px;
+        }
+        
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #eee;
         }
         
-        h1 {
-            color: #333;
-            margin-bottom: 24px;
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .header-subtitle {
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
         
         .filters {
@@ -284,8 +306,13 @@
     
     <div class="container">
         <div class="header">
-            <h1>Pareceres</h1>
-            <button class="btn btn-primary" id="btn-novo-parecer" onclick="abrirFormulario()" style="display: none;">+ Novo Parecer</button>
+            <div class="header-info">
+                <h1>Pareceres</h1>
+                <p class="header-subtitle" id="header-subtitle">Gerenciar pareceres cadastrados no sistema</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="btn-novo-parecer" onclick="abrirFormulario()" style="display: none;">+ Novo Parecer</button>
+            </div>
         </div>
         
         <div id="error-message" class="error" style="display: none;"></div>
@@ -445,8 +472,10 @@
                 if (data.pareceres && data.pareceres.length > 0) {
                     document.getElementById('pareceres-container').style.display = 'block';
                     renderizarPareceres(data.pareceres);
+                    atualizarHeaderSubtitle(data.pareceres.length, data.total || data.pareceres.length);
                 } else {
                     document.getElementById('empty').style.display = 'block';
+                    atualizarHeaderSubtitle(0, 0);
                 }
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
@@ -494,6 +523,17 @@
             
             if (podeEditar) {
                 document.getElementById('btn-novo-parecer').style.display = 'inline-block';
+            }
+        }
+        
+        function atualizarHeaderSubtitle(exibidos, total) {
+            const subtitleEl = document.getElementById('header-subtitle');
+            if (total === 0) {
+                subtitleEl.textContent = 'Nenhum parecer cadastrado';
+            } else if (exibidos === total) {
+                subtitleEl.textContent = `${total} ${total === 1 ? 'parecer cadastrado' : 'pareceres cadastrados'}`;
+            } else {
+                subtitleEl.textContent = `Exibindo ${exibidos} de ${total} ${total === 1 ? 'parecer' : 'pareceres'}`;
             }
         }
         
