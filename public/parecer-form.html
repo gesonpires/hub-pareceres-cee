@@ -440,13 +440,9 @@
             }
         }
         
-        // Carregar escolas sempre (necessário para select)
-        carregarEscolas();
+        // Carregar escolas será feito após DOM estar pronto (ver final do script)
         
-        if (parecerId) {
-            document.getElementById('titulo').textContent = 'Editar Parecer';
-            carregarParecer(parecerId);
-        }
+        // Inicialização será feita após DOM estar pronto
         
         async function carregarParecer(id) {
             try {
@@ -665,22 +661,12 @@
             window.location.href = '/pareceres.html';
         }
         
-        // Definir data padrão como hoje (apenas para novo parecer)
-        if (!parecerId) {
-            document.getElementById('dataParecer').valueAsDate = new Date();
-        }
-        
-        // Carregar escolas após DOM estar pronto
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarEscolas();
-        });
-        
-        // Também tentar carregar imediatamente (caso DOM já esteja pronto)
+        // Inicializar após DOM estar pronto
         if (document.readyState === 'loading') {
-            // DOM ainda não carregou, aguardar DOMContentLoaded
+            document.addEventListener('DOMContentLoaded', inicializar);
         } else {
-            // DOM já está pronto, carregar escolas agora
-            carregarEscolas();
+            // DOM já está pronto
+            inicializar();
         }
     </script>
 </body>
