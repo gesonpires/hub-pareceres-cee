@@ -50,8 +50,14 @@ export const uploadArquivos = [
           
           // Garantir que textoExtraido seja string antes de armazenar
           let textoExtraidoString = '';
+          console.log(`[DEBUG] Tipo de textoExtraido: ${typeof resultado.textoExtraido}`);
+          console.log(`[DEBUG] É string? ${typeof resultado.textoExtraido === 'string'}`);
+          console.log(`[DEBUG] É Promise? ${resultado.textoExtraido && typeof resultado.textoExtraido.then === 'function'}`);
+          console.log(`[DEBUG] É objeto? ${resultado.textoExtraido && typeof resultado.textoExtraido === 'object'}`);
+          
           if (typeof resultado.textoExtraido === 'string') {
             textoExtraidoString = resultado.textoExtraido;
+            console.log(`[DEBUG] Texto extraído (primeiros 100 chars): ${textoExtraidoString.substring(0, 100)}`);
           } else if (resultado.textoExtraido && typeof resultado.textoExtraido.then === 'function') {
             // Se for Promise, aguardar (não deveria acontecer)
             console.error('textoExtraido é uma Promise no resultado!');
@@ -62,7 +68,7 @@ export const uploadArquivos = [
             }
           } else if (resultado.textoExtraido && typeof resultado.textoExtraido === 'object') {
             // Se for objeto, tentar converter
-            console.warn('textoExtraido é um objeto no resultado! Tentando converter...');
+            console.warn('textoExtraido é um objeto no resultado! Tentando converter...', Object.keys(resultado.textoExtraido));
             try {
               textoExtraidoString = JSON.stringify(resultado.textoExtraido);
             } catch (e) {
@@ -71,6 +77,8 @@ export const uploadArquivos = [
           } else {
             textoExtraidoString = String(resultado.textoExtraido || '');
           }
+          
+          console.log(`[DEBUG] Texto final (tipo: ${typeof textoExtraidoString}, tamanho: ${textoExtraidoString.length})`);
           
           // Criar objeto limpo para armazenar (sem spread para evitar problemas)
           const arquivoProcessado: any = {
@@ -83,7 +91,13 @@ export const uploadArquivos = [
             uploadedAt: new Date().toISOString()
           };
           
+          // Verificar antes de armazenar
+          console.log(`[DEBUG] Antes de armazenar - tipo textoExtraido: ${typeof arquivoProcessado.textoExtraido}`);
           arquivosProcessados.set(id, arquivoProcessado);
+          
+          // Verificar após armazenar
+          const arquivoArmazenado = arquivosProcessados.get(id);
+          console.log(`[DEBUG] Após armazenar - tipo textoExtraido: ${typeof arquivoArmazenado?.textoExtraido}`);
 
           return {
             id,
@@ -117,16 +131,21 @@ export const obterPreview = async (req: Request, res: Response) => {
     }
 
     // Garantir que textoExtraido seja string e não uma Promise ou objeto
+    console.log(`[DEBUG PREVIEW] Tipo de arquivo.textoExtraido: ${typeof arquivo.textoExtraido}`);
+    console.log(`[DEBUG PREVIEW] É string? ${typeof arquivo.textoExtraido === 'string'}`);
+    console.log(`[DEBUG PREVIEW] É objeto? ${arquivo.textoExtraido && typeof arquivo.textoExtraido === 'object'}`);
+    
     let textoExtraidoString = '';
     if (typeof arquivo.textoExtraido === 'string') {
       textoExtraidoString = arquivo.textoExtraido;
+      console.log(`[DEBUG PREVIEW] Texto extraído (primeiros 100 chars): ${textoExtraidoString.substring(0, 100)}`);
     } else if (arquivo.textoExtraido && typeof arquivo.textoExtraido.then === 'function') {
       // Se for uma Promise, isso é um erro - não deveria acontecer
       console.error('textoExtraido é uma Promise! Isso não deveria acontecer.');
       textoExtraidoString = '';
     } else if (arquivo.textoExtraido && typeof arquivo.textoExtraido === 'object') {
       // Se for objeto, tentar converter
-      console.warn('textoExtraido é um objeto! Tentando converter...', typeof arquivo.textoExtraido);
+      console.warn('textoExtraido é um objeto! Tentando converter...', Object.keys(arquivo.textoExtraido));
       try {
         textoExtraidoString = JSON.stringify(arquivo.textoExtraido);
       } catch (e) {
@@ -135,6 +154,8 @@ export const obterPreview = async (req: Request, res: Response) => {
     } else {
       textoExtraidoString = String(arquivo.textoExtraido || '');
     }
+    
+    console.log(`[DEBUG PREVIEW] Texto final (tipo: ${typeof textoExtraidoString}, tamanho: ${textoExtraidoString.length})`);
     
     // Criar objeto novo para garantir serialização correta
     const arquivoSerializado = {
@@ -146,6 +167,8 @@ export const obterPreview = async (req: Request, res: Response) => {
       erro: arquivo.erro,
       uploadedAt: arquivo.uploadedAt
     };
+    
+    console.log(`[DEBUG PREVIEW] Antes de enviar - tipo textoExtraido: ${typeof arquivoSerializado.textoExtraido}`);
 
     res.json(arquivoSerializado);
   } catch (error: any) {
