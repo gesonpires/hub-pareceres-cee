@@ -1,17 +1,16 @@
 import fs from 'fs';
 
-// pdf-parse exporta como objeto, a função principal está em PDFParse
-// Mas também pode exportar diretamente dependendo da versão
+// pdf-parse v2.4.5 exporta PDFParse como classe que precisa ser instanciada
 const pdfModule = require('pdf-parse');
-const pdfParse = (typeof pdfModule === 'function') 
-  ? pdfModule 
-  : (pdfModule.PDFParse || pdfModule.default || pdfModule);
+const PDFParse = pdfModule.PDFParse;
 
 export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
   try {
     const buffer = fs.readFileSync(caminhoArquivo);
-    const data = await pdfParse(buffer);
-    return data.text || '';
+    const parser = new PDFParse(buffer);
+    await parser.load();
+    const text = parser.getText();
+    return text || '';
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
     throw new Error('Erro ao extrair texto do arquivo PDF');
@@ -20,8 +19,10 @@ export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
 
 export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdfParse(buffer);
-    return data.text || '';
+    const parser = new PDFParse(buffer);
+    await parser.load();
+    const text = parser.getText();
+    return text || '';
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
     throw new Error('Erro ao extrair texto do arquivo PDF');
