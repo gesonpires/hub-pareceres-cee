@@ -329,6 +329,7 @@
             
             <div class="buttons">
                 <button type="button" class="btn btn-secondary" onclick="voltar()">Cancelar</button>
+                <button type="button" class="btn btn-secondary" id="btn-criar-outro" onclick="limparFormulario()" style="display: none;">Criar Outro Ato</button>
                 <button type="submit" class="btn btn-primary">Salvar</button>
             </div>
         </form>
@@ -614,6 +615,9 @@
             // Resetar valores específicos
             document.getElementById('tipoAto').value = '';
             document.getElementById('statusVigencia').value = '';
+            
+            // Ocultar botão "Criar Outro Ato"
+            document.getElementById('btn-criar-outro').style.display = 'none';
         }
         
         function voltar() {
