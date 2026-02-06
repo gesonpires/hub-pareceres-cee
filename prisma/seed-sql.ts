@@ -17,12 +17,16 @@ async function main() {
   const usuarioConsultaId = 'user-consulta-001';
   const usuarioEdicaoId = 'user-edicao-001';
 
+  // Hash bcrypt de "senha123" para ambos os usuários
+  const senhaHash = '$2b$10$4vRWVA9J0qiqb.T1XXMKNOQOvEL6bxE1QKGc6bBq7dOLplDulc99C';
+
   db.prepare(
-    'INSERT INTO usuarios (id, nome, email, perfil, ativo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO usuarios (id, nome, email, senha, perfil, ativo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   ).run(
     usuarioConsultaId,
     'Usuário Consulta',
     'consulta@cee.sc.gov.br',
+    senhaHash,
     'consulta',
     1,
     new Date().toISOString(),
@@ -30,11 +34,12 @@ async function main() {
   );
 
   db.prepare(
-    'INSERT INTO usuarios (id, nome, email, perfil, ativo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO usuarios (id, nome, email, senha, perfil, ativo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
   ).run(
     usuarioEdicaoId,
     'Usuário Edição',
     'edicao@cee.sc.gov.br',
+    senhaHash,
     'edicao',
     1,
     new Date().toISOString(),
