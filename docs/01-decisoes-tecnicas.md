@@ -26,3 +26,19 @@
 - Migração para Postgres pode ser feita posteriormente se necessário para ambiente multiusuário
 
 **Registrado em:** 2024 (data a ser preenchida conforme contexto do projeto)
+
+---
+
+## T5.1 — Origem inicial dos dados
+
+**Decisão:** os dados serão **digitados manualmente** no início do MVP.
+
+**Justificativa:**
+- Foco do MVP é na geração automática do texto "ATOS AUTORIZATIVOS", não na importação
+- Cadastro manual permite validação e refinamento das telas e fluxos
+- Facilita identificação de problemas de usabilidade e ajustes necessários
+- Importação por CSV pode ser considerada em fase posterior (Fase 2 do produto) se houver necessidade
+
+**Observação:** A funcionalidade de importação por CSV não está no escopo do MVP e será deixada para Fase 2 do produto, conforme indicado no backlog.
+
+**Registrado em:** 2024 (data a ser preenchida conforme contexto do projeto)
