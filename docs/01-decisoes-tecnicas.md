@@ -11,3 +11,18 @@
 - Migração para ambiente multiusuário pode ser considerada em fase posterior conforme necessidade
 
 **Registrado em:** 2024 (data a ser preenchida conforme contexto do projeto)
+
+---
+
+## T1.2 — Persistência do MVP
+
+**Decisão:** persistência local usando **SQLite** (arquivo local).
+
+**Justificativa:**
+- Alinhado com decisão de execução local do MVP (T1.1)
+- Simplicidade máxima: zero configuração de servidor de banco de dados
+- Arquivo único facilita backup e portabilidade
+- Suficiente para volume de dados do MVP
+- Migração para Postgres pode ser feita posteriormente se necessário para ambiente multiusuário
+
+**Registrado em:** 2024 (data a ser preenchida conforme contexto do projeto)
