@@ -66,6 +66,10 @@ app.get('/parecer-view.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/parecer-view.html'));
 });
 
+app.get('/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+});
+
 app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/login.html'));
 });

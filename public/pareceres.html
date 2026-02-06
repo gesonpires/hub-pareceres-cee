@@ -281,10 +281,15 @@
                 document.getElementById('empty').style.display = 'none';
                 document.getElementById('error-message').style.display = 'none';
                 
+                // Verificar se há parâmetros de busca rápida na URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const buscaNumero = urlParams.get('numero');
+                const buscaAno = urlParams.get('ano');
+                
                 const params = new URLSearchParams();
                 const escola = document.getElementById('filter-escola').value;
-                const numero = document.getElementById('filter-numero').value;
-                const ano = document.getElementById('filter-ano').value;
+                const numero = buscaNumero || document.getElementById('filter-numero').value;
+                const ano = buscaAno || document.getElementById('filter-ano').value;
                 const status = document.getElementById('filter-status').value;
                 const dataInicio = document.getElementById('filter-data-inicio').value;
                 const dataFim = document.getElementById('filter-data-fim').value;
@@ -292,6 +297,14 @@
                 const cidade = document.getElementById('filter-cidade').value;
                 const cnpj = document.getElementById('filter-cnpj').value;
                 const inep = document.getElementById('filter-inep').value;
+                
+                // Preencher campos de filtro se vieram da busca rápida
+                if (buscaNumero) {
+                    document.getElementById('filter-numero').value = buscaNumero;
+                }
+                if (buscaAno) {
+                    document.getElementById('filter-ano').value = buscaAno;
+                }
                 
                 if (escola) params.append('escola', escola);
                 if (numero) params.append('numero', numero);
