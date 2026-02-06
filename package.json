@@ -7,6 +7,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed-sql.ts",
+    "seed": "tsx prisma/seed-sql.ts",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "dev": "tsx watch src/server.ts",
@@ -17,7 +18,7 @@
     "test:coverage": "jest --coverage"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed-sql.ts"
   },
   "dependencies": {
     "@prisma/client": "^7.3.0",
