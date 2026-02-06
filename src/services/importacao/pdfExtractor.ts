@@ -30,7 +30,10 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
   try {
     // pdf-parse v2.4.5 requer Uint8Array ao invés de Buffer
     const uint8Array = new Uint8Array(buffer);
-    const parser = new PDFParse(uint8Array);
+    // Configurar opções para evitar warnings sobre standardFontDataUrl
+    const parser = new PDFParse(uint8Array, {
+      standardFontDataUrl: undefined // Usar fontes padrão
+    });
     await parser.load();
     const text = parser.getText();
     // Garantir que retornamos uma string
