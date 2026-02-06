@@ -796,21 +796,64 @@
             document.getElementById(`sugestoes-escola-${id}`).style.display = 'none';
         }
         
+        // Tornar funções globalmente acessíveis
+        window.selecionarEscola = selecionarEscola;
+        window.buscarEscolas = buscarEscolas;
+        
         async function importarParecer(id) {
-            const escolaId = document.getElementById(`escola-id-${id}`).value;
-            const numeroParecer = document.getElementById(`numero-parecer-${id}`).value;
-            const anoParecer = document.getElementById(`ano-parecer-${id}`).value;
-            const dataParecer = document.getElementById(`data-parecer-${id}`).value;
-            const ementa = document.getElementById(`ementa-${id}`).value.trim();
-            const status = document.getElementById(`status-${id}`).value;
+            console.log('[IMPORTAR] Iniciando importação do parecer:', id);
+            
+            const escolaIdElement = document.getElementById(`escola-id-${id}`);
+            const numeroParecerElement = document.getElementById(`numero-parecer-${id}`);
+            const anoParecerElement = document.getElementById(`ano-parecer-${id}`);
+            const dataParecerElement = document.getElementById(`data-parecer-${id}`);
+            const ementaElement = document.getElementById(`ementa-${id}`);
+            const statusElement = document.getElementById(`status-${id}`);
+            
+            if (!escolaIdElement || !numeroParecerElement || !anoParecerElement || !dataParecerElement || !ementaElement || !statusElement) {
+                console.error('[IMPORTAR] Elementos não encontrados:', {
+                    escolaId: !!escolaIdElement,
+                    numeroParecer: !!numeroParecerElement,
+                    anoParecer: !!anoParecerElement,
+                    dataParecer: !!dataParecerElement,
+                    ementa: !!ementaElement,
+                    status: !!statusElement
+                });
+                mostrarErro('Erro: Campos do formulário não encontrados. Recarregue a página.');
+                return;
+            }
+            
+            const escolaId = escolaIdElement.value;
+            const numeroParecer = numeroParecerElement.value;
+            const anoParecer = anoParecerElement.value;
+            const dataParecer = dataParecerElement.value;
+            const ementa = ementaElement.value.trim();
+            const status = statusElement.value;
+            
+            console.log('[IMPORTAR] Valores coletados:', {
+                escolaId,
+                numeroParecer,
+                anoParecer,
+                dataParecer,
+                ementa: ementa.substring(0, 50) + '...',
+                status
+            });
             
             // Validação
             if (!escolaId || !numeroParecer || !anoParecer || !dataParecer || !ementa) {
-                mostrarErro('Por favor, preencha todos os campos obrigatórios.');
+                const camposFaltantes = [];
+                if (!escolaId) camposFaltantes.push('Escola');
+                if (!numeroParecer) camposFaltantes.push('Número do Parecer');
+                if (!anoParecer) camposFaltantes.push('Ano do Parecer');
+                if (!dataParecer) camposFaltantes.push('Data do Parecer');
+                if (!ementa) camposFaltantes.push('Ementa');
+                
+                mostrarErro(`Por favor, preencha todos os campos obrigatórios: ${camposFaltantes.join(', ')}`);
                 return;
             }
             
             try {
+                console.log('[IMPORTAR] Enviando requisição...');
                 const response = await fetch(`${API_URL}/importacao/confirmar/${id}`, {
                     method: 'POST',
                     headers: {
@@ -827,6 +870,8 @@
                     })
                 });
                 
+                console.log('[IMPORTAR] Resposta recebida:', response.status, response.statusText);
+                
                 if (response.status === 401) {
                     localStorage.removeItem('token');
                     window.location.href = '/login.html';
@@ -835,8 +880,12 @@
                 
                 if (!response.ok) {
                     const error = await response.json();
+                    console.error('[IMPORTAR] Erro na resposta:', error);
                     throw new Error(error.error || 'Erro ao importar parecer');
                 }
+                
+                const data = await response.json();
+                console.log('[IMPORTAR] Sucesso!', data);
                 
                 mostrarSucesso('Parecer importado com sucesso!');
                 
@@ -845,9 +894,13 @@
                     removerArquivo(id);
                 }, 1500);
             } catch (error) {
+                console.error('[IMPORTAR] Erro capturado:', error);
                 mostrarErro('Erro ao importar parecer: ' + error.message);
             }
         }
+        
+        // Tornar função globalmente acessível
+        window.importarParecer = importarParecer;
         
         // Função para copiar texto extraído
         function copiarTextoExtraido(id) {
