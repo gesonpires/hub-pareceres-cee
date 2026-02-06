@@ -48,8 +48,14 @@ export const uploadArquivos = [
           const id = uuidv4();
           const resultado = await processarArquivo(file.buffer, file.originalname);
           
+          // Garantir que textoExtraido seja string antes de armazenar
+          const textoExtraidoString = typeof resultado.textoExtraido === 'string' 
+            ? resultado.textoExtraido 
+            : String(resultado.textoExtraido || '');
+          
           arquivosProcessados.set(id, {
             ...resultado,
+            textoExtraido: textoExtraidoString,
             id,
             uploadedAt: new Date().toISOString()
           });

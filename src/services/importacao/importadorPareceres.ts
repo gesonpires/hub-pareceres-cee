@@ -50,7 +50,21 @@ export async function processarArquivo(
     }
 
     // Parsear texto para sugerir dados
-    const dadosSugeridos = parsearParecer(textoExtraido);
+    let dadosSugeridos = parsearParecer(textoExtraido);
+    
+    // Se não encontrou número/ano no texto, tentar extrair do nome do arquivo
+    // Padrão: CEE_SC_XXX_YYYY
+    if (!dadosSugeridos.numeroParecer || !dadosSugeridos.anoParecer) {
+      const nomeMatch = nomeArquivo.match(/cee[_\s\/]*sc[_\s]*(\d+)[_\s]*(\d{4})/i);
+      if (nomeMatch) {
+        const numero = parseInt(nomeMatch[1]);
+        const ano = parseInt(nomeMatch[2]);
+        if (numero > 0 && ano >= 2000 && ano <= 2100) {
+          dadosSugeridos.numeroParecer = numero;
+          dadosSugeridos.anoParecer = ano;
+        }
+      }
+    }
 
     return {
       nomeArquivo,

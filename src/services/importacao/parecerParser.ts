@@ -70,12 +70,13 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
     }
   }
 
-  // Tentar extrair ementa
-  // Padrões: "Ementa:", "E M E N T A", etc.
-  // Também procurar por parágrafos após palavras-chave
+  // Tentar extrair ementa (OBJETO no parecer)
+  // Priorizar "OBJETO" que é o termo usado nos pareceres
+  // Padrões: "OBJETO:", "Objeto:", "Ementa:", etc.
   const ementaPatterns = [
+    /(?:objeto|o\s*b\s*j\s*e\s*t\s*o)[\s:]*([^\n]{50,1000})/i,
     /(?:ementa|e\s*m\s*e\s*n\s*t\s*a)[\s:]*([^\n]{50,800})/i,
-    /(?:resumo|objeto)[\s:]*([^\n]{50,800})/i,
+    /(?:resumo)[\s:]*([^\n]{50,800})/i,
     /(?:sobre|trata[\s-]?se|referente)[\s:]*([^\n]{50,800})/i
   ];
 
