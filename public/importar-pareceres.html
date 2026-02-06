@@ -1022,8 +1022,19 @@
         
         function mostrarErro(mensagem) {
             const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = mensagem;
+            if (mensagem && mensagem.includes('<a href')) {
+                // Se contém HTML (link), usar innerHTML
+                errorDiv.innerHTML = mensagem.replace(/\n/g, '<br>');
+            } else {
+                // Caso contrário, usar textContent para segurança
+                errorDiv.textContent = mensagem;
+            }
             errorDiv.style.display = mensagem ? 'block' : 'none';
+            
+            // Scroll para o topo para ver a mensagem
+            if (mensagem) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
         
         function mostrarSucesso(mensagem) {
