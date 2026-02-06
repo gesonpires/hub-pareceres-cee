@@ -696,9 +696,21 @@
                     
                     <div class="form-group full-width">
                         <label>Texto Extraído (referência)</label>
-                        <div class="texto-extraido">${typeof arquivo.textoExtraido === 'string' 
-                            ? (arquivo.textoExtraido.substring(0, 2000) + (arquivo.textoExtraido.length > 2000 ? '...' : ''))
-                            : 'Texto não disponível'}</div>
+                        <div class="texto-extraido">${(() => {
+                            let texto = arquivo.textoExtraido;
+                            if (!texto) return 'Texto não disponível';
+                            if (typeof texto !== 'string') {
+                                // Tentar converter objeto para string
+                                if (texto && typeof texto.toString === 'function') {
+                                    texto = texto.toString();
+                                } else {
+                                    texto = JSON.stringify(texto);
+                                }
+                            }
+                            const textoLimpo = texto.substring(0, 2000) + (texto.length > 2000 ? '...' : '');
+                            // Escapar HTML para exibir corretamente
+                            return textoLimpo.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        })()}</div>
                     </div>
                     
                     <div class="form-group full-width" style="margin-top: 16px;">

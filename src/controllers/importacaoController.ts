@@ -49,16 +49,29 @@ export const uploadArquivos = [
           const resultado = await processarArquivo(file.buffer, file.originalname);
           
           // Garantir que textoExtraido seja string antes de armazenar
-          const textoExtraidoString = typeof resultado.textoExtraido === 'string' 
-            ? resultado.textoExtraido 
-            : String(resultado.textoExtraido || '');
+          let textoExtraidoString = '';
+          if (typeof resultado.textoExtraido === 'string') {
+            textoExtraidoString = resultado.textoExtraido;
+          } else if (resultado.textoExtraido && typeof resultado.textoExtraido.then === 'function') {
+            // Se for Promise, aguardar (não deveria acontecer)
+            console.error('textoExtraido é uma Promise no resultado!');
+            textoExtraidoString = await resultado.textoExtraido;
+          } else {
+            textoExtraidoString = String(resultado.textoExtraido || '');
+          }
           
-          arquivosProcessados.set(id, {
-            ...resultado,
+          // Criar objeto limpo para armazenar
+          const arquivoProcessado = {
+            nomeArquivo: resultado.nomeArquivo,
+            tipo: resultado.tipo,
             textoExtraido: textoExtraidoString,
+            dadosSugeridos: resultado.dadosSugeridos,
+            erro: resultado.erro,
             id,
             uploadedAt: new Date().toISOString()
-          });
+          };
+          
+          arquivosProcessados.set(id, arquivoProcessado);
 
           return {
             id,

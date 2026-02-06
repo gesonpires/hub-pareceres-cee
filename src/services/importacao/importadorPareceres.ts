@@ -45,7 +45,17 @@ export async function processarArquivo(
     }
 
     // Garantir que textoExtraido é uma string antes de chamar trim()
-    if (!textoExtraido || typeof textoExtraido !== 'string' || textoExtraido.trim().length === 0) {
+    // Se for Promise, aguardar (não deveria acontecer)
+    if (textoExtraido && typeof textoExtraido.then === 'function') {
+      textoExtraido = await textoExtraido;
+    }
+    
+    // Garantir que é string
+    if (typeof textoExtraido !== 'string') {
+      textoExtraido = String(textoExtraido || '');
+    }
+    
+    if (!textoExtraido || textoExtraido.trim().length === 0) {
       throw new Error('Não foi possível extrair texto do arquivo. O arquivo pode estar corrompido ou ser uma imagem escaneada.');
     }
 
