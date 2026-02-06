@@ -188,7 +188,7 @@
     <div class="container">
         <div class="header">
             <h1>Pareceres</h1>
-            <button class="btn btn-primary" onclick="abrirFormulario()">+ Novo Parecer</button>
+            <button class="btn btn-primary" id="btn-novo-parecer" onclick="abrirFormulario()" style="display: none;">+ Novo Parecer</button>
         </div>
         
         <div id="error-message" class="error" style="display: none;"></div>
@@ -349,12 +349,19 @@
             const tbody = document.getElementById('pareceres-tbody');
             tbody.innerHTML = '';
             
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const podeEditar = user.perfil === 'edicao';
+            
             pareceres.forEach(parecer => {
                 const tr = document.createElement('tr');
                 const dataParecer = new Date(parecer.dataParecer).toLocaleDateString('pt-BR');
                 const ementaResumida = parecer.ementa.length > 60 
                     ? parecer.ementa.substring(0, 60) + '...' 
                     : parecer.ementa;
+                
+                const botaoEditar = podeEditar 
+                    ? `<button class="btn btn-sm btn-edit" onclick="editarParecer('${parecer.id}')">Editar</button>`
+                    : '';
                 
                 tr.innerHTML = `
                     <td>${parecer.numeroParecer}/${parecer.anoParecer}</td>
@@ -365,11 +372,20 @@
                     <td><span class="badge badge-${parecer.status}">${parecer.status}</span></td>
                     <td class="actions">
                         <a href="/parecer-view.html?id=${parecer.id}" class="btn btn-sm btn-view">Ver</a>
-                        <button class="btn btn-sm btn-edit" onclick="editarParecer('${parecer.id}')">Editar</button>
+                        ${botaoEditar}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+        
+        function verificarPermissoes() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const podeEditar = user.perfil === 'edicao';
+            
+            if (podeEditar) {
+                document.getElementById('btn-novo-parecer').style.display = 'inline-block';
+            }
         }
         
         function filtrarPareceres() {
@@ -393,7 +409,8 @@
             }, 5000);
         }
         
-        // Carregar pareceres ao carregar a página
+        // Verificar permissões e carregar pareceres ao carregar a página
+        verificarPermissoes();
         carregarPareceres();
     </script>
 </body>

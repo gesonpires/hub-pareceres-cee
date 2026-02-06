@@ -201,7 +201,7 @@
                 <h1 id="escola-nome">Carregando...</h1>
                 <a href="/escolas.html" class="btn btn-secondary">← Voltar para Escolas</a>
             </div>
-            <button class="btn btn-primary" onclick="abrirFormularioAto()">+ Novo Ato Autorizativo</button>
+            <button class="btn btn-primary" id="btn-novo-ato" onclick="abrirFormularioAto()" style="display: none;">+ Novo Ato Autorizativo</button>
         </div>
         
         <div id="error-message" class="error" style="display: none;"></div>
@@ -339,9 +339,17 @@
             const tbody = document.getElementById('atos-tbody');
             tbody.innerHTML = '';
             
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const podeEditar = user.perfil === 'edicao';
+            
             atos.forEach(ato => {
                 const tr = document.createElement('tr');
                 const dataPub = new Date(ato.dataPublicacao).toLocaleDateString('pt-BR');
+                
+                const botoesEdicao = podeEditar 
+                    ? `<button class="btn btn-sm btn-edit" onclick="editarAto('${ato.id}')">Editar</button>
+                       <button class="btn btn-sm btn-delete" onclick="excluirAto('${ato.id}')">Excluir</button>`
+                    : '';
                 
                 tr.innerHTML = `
                     <td>${ato.tipoAto}</td>
@@ -352,12 +360,20 @@
                     <td><span class="badge badge-${ato.statusVigencia}">${ato.statusVigencia}</span></td>
                     <td>${ato.observacoes ? (ato.observacoes.length > 50 ? ato.observacoes.substring(0, 50) + '...' : ato.observacoes) : '-'}</td>
                     <td class="actions">
-                        <button class="btn btn-sm btn-edit" onclick="editarAto('${ato.id}')">Editar</button>
-                        <button class="btn btn-sm btn-delete" onclick="excluirAto('${ato.id}')">Excluir</button>
+                        ${botoesEdicao}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+        
+        function verificarPermissoes() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const podeEditar = user.perfil === 'edicao';
+            
+            if (podeEditar) {
+                document.getElementById('btn-novo-ato').style.display = 'inline-block';
+            }
         }
         
         function abrirFormularioAto(id = null) {
@@ -413,7 +429,8 @@
             }, 5000);
         }
         
-        // Carregar dados ao carregar a página
+        // Verificar permissões e carregar dados ao carregar a página
+        verificarPermissoes();
         carregarEscola();
         carregarAtos();
     </script>

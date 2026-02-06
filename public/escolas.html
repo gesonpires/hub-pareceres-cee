@@ -186,7 +186,7 @@
     <div class="container">
         <div class="header">
             <h1>Escolas</h1>
-            <button class="btn btn-primary" onclick="abrirFormulario()">+ Nova Escola</button>
+            <button class="btn btn-primary" id="btn-nova-escola" onclick="abrirFormulario()" style="display: none;">+ Nova Escola</button>
         </div>
         
         <div id="error-message" class="error" style="display: none;"></div>
@@ -304,8 +304,16 @@
             const tbody = document.getElementById('escolas-tbody');
             tbody.innerHTML = '';
             
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const podeEditar = user.perfil === 'edicao';
+            
             escolas.forEach(escola => {
                 const tr = document.createElement('tr');
+                const botoesEdicao = podeEditar 
+                    ? `<button class="btn btn-sm btn-edit" onclick="editarEscola('${escola.id}')">Editar</button>
+                       ${escola.situacao === 'ativa' ? `<button class="btn btn-sm btn-deactivate" onclick="desativarEscola('${escola.id}')">Desativar</button>` : ''}`
+                    : '';
+                
                 tr.innerHTML = `
                     <td>${escola.nomeOficial}</td>
                     <td>${escola.codigoIneq || '-'}</td>
@@ -315,12 +323,20 @@
                     <td><span class="badge badge-${escola.situacao}">${escola.situacao}</span></td>
                     <td class="actions">
                         <a href="/escola-detalhe.html?id=${escola.id}" class="btn btn-sm btn-secondary">Ver Detalhes</a>
-                        <button class="btn btn-sm btn-edit" onclick="editarEscola('${escola.id}')">Editar</button>
-                        ${escola.situacao === 'ativa' ? `<button class="btn btn-sm btn-deactivate" onclick="desativarEscola('${escola.id}')">Desativar</button>` : ''}
+                        ${botoesEdicao}
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+        
+        function verificarPermissoes() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const podeEditar = user.perfil === 'edicao';
+            
+            if (podeEditar) {
+                document.getElementById('btn-nova-escola').style.display = 'inline-block';
+            }
         }
         
         function filtrarEscolas() {
@@ -380,7 +396,8 @@
             }, 5000);
         }
         
-        // Carregar escolas ao carregar a página
+        // Verificar permissões e carregar escolas ao carregar a página
+        verificarPermissoes();
         carregarEscolas();
     </script>
 </body>
