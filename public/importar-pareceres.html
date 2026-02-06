@@ -391,16 +391,14 @@
             left: 0;
             right: 0;
             background: white;
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
             border: 1px solid #ddd;
             border-radius: 6px;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: none;
+            margin-top: 4px;
         }
         
         .sugestao-escola-item {
@@ -666,8 +664,9 @@
                         <div class="busca-escola">
                             <input type="text" 
                                    id="escola-busca-${id}" 
-                                   placeholder="Digite o nome da escola..."
-                                   oninput="buscarEscolas('${id}', this.value)" />
+                                   placeholder="Digite o nome da escola (mínimo 2 caracteres)..."
+                                   oninput="window.buscarEscolas('${id}', this.value)"
+                                   autocomplete="off" />
                             <div class="sugestoes-escola" id="sugestoes-escola-${id}"></div>
                         </div>
                         <input type="hidden" id="escola-id-${id}" />
