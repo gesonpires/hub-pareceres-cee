@@ -363,12 +363,8 @@
             window.location.href = '/login.html';
         }
         
-        // Carregar informações do usuário na navbar
+        // Carregar informações do usuário
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const navUserName = document.getElementById('nav-user-name');
-        if (user.email && navUserName) {
-            navUserName.textContent = user.email;
-        }
         
         // Verificar permissões - bloquear acesso de perfil consulta
         if (user.perfil === 'consulta') {
@@ -440,9 +436,32 @@
             }
         }
         
-        // Carregar escolas será feito após DOM estar pronto (ver final do script)
-        
-        // Inicialização será feita após DOM estar pronto
+        // Função para inicializar após DOM estar pronto
+        function inicializar() {
+            // Carregar email do usuário na navbar
+            const navUserName = document.getElementById('nav-user-name');
+            if (user.email && navUserName) {
+                navUserName.textContent = user.email;
+            }
+            
+            // Carregar escolas
+            carregarEscolas();
+            
+            // Se for edição, carregar dados do parecer
+            if (parecerId) {
+                const tituloEl = document.getElementById('titulo');
+                if (tituloEl) {
+                    tituloEl.textContent = 'Editar Parecer';
+                }
+                carregarParecer(parecerId);
+            } else {
+                // Definir data padrão como hoje (apenas para novo parecer)
+                const dataParecerField = document.getElementById('dataParecer');
+                if (dataParecerField) {
+                    dataParecerField.valueAsDate = new Date();
+                }
+            }
+        }
         
         async function carregarParecer(id) {
             try {
