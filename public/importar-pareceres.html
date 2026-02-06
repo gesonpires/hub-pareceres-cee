@@ -620,10 +620,6 @@
                 }
                 
                 const arquivo = await response.json();
-                console.log('[FRONTEND DEBUG] Arquivo recebido:', arquivo);
-                console.log('[FRONTEND DEBUG] Tipo de textoExtraido:', typeof arquivo.textoExtraido);
-                console.log('[FRONTEND DEBUG] É string?', typeof arquivo.textoExtraido === 'string');
-                console.log('[FRONTEND DEBUG] Primeiros 100 chars:', arquivo.textoExtraido?.substring?.(0, 100));
                 exibirPreview(id, arquivo);
             } catch (error) {
                 const previewDiv = document.getElementById(`preview-${id}`);
@@ -643,22 +639,14 @@
             const dados = arquivo.dadosSugeridos;
             
             // Garantir que textoExtraido seja string
-            console.log('[FRONTEND DEBUG exibirPreview] Tipo de arquivo.textoExtraido:', typeof arquivo.textoExtraido);
-            console.log('[FRONTEND DEBUG exibirPreview] Valor:', arquivo.textoExtraido);
-            
             let textoExtraido = arquivo.textoExtraido || '';
             if (typeof textoExtraido !== 'string') {
-                console.warn('[FRONTEND DEBUG] textoExtraido não é string, tentando converter...');
                 if (textoExtraido && typeof textoExtraido.toString === 'function') {
                     textoExtraido = textoExtraido.toString();
-                    console.log('[FRONTEND DEBUG] Após toString:', typeof textoExtraido);
                 } else {
                     textoExtraido = JSON.stringify(textoExtraido);
-                    console.log('[FRONTEND DEBUG] Após JSON.stringify:', typeof textoExtraido);
                 }
             }
-            
-            console.log('[FRONTEND DEBUG] Texto final (tipo, tamanho):', typeof textoExtraido, textoExtraido.length);
             
             // Escapar HTML para exibir corretamente
             const textoEscapado = textoExtraido

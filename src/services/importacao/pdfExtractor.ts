@@ -36,23 +36,15 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
     });
     await parser.load();
     
-    // Verificar o tipo de getText() e como extrair o texto corretamente
+    // getText() retorna uma Promise que precisa ser aguardada
     let text: any = parser.getText();
-    
-    console.log('[PDF EXTRACTOR] Tipo de getText():', typeof text);
-    console.log('[PDF EXTRACTOR] É função?', typeof text === 'function');
-    console.log('[PDF EXTRACTOR] É Promise?', text && typeof text.then === 'function');
-    console.log('[PDF EXTRACTOR] É objeto?', text && typeof text === 'object');
-    if (text && typeof text === 'object') {
-      console.log('[PDF EXTRACTOR] Chaves do objeto:', Object.keys(text));
-    }
     
     // Se getText() for uma função, chamar ela
     if (typeof text === 'function') {
       text = text();
     }
     
-    // Se retornar uma Promise, aguardar
+    // Se retornar uma Promise, aguardar (comportamento padrão do pdf-parse v2.4.5)
     if (text && typeof text.then === 'function') {
       text = await text;
     }
@@ -72,8 +64,7 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
         if (str !== '[object Object]') {
           text = str;
         } else {
-          // Se toString() retorna [object Object], tentar acessar páginas
-          console.log('[PDF EXTRACTOR] toString() retornou [object Object], tentando método alternativo...');
+          // Se toString() retorna [object Object], tentar método alternativo
           try {
             // Tentar método alternativo: acessar diretamente as páginas
             const pages = parser.getPages();
@@ -94,7 +85,7 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
               text = JSON.stringify(text);
             }
           } catch (e) {
-            console.error('[PDF EXTRACTOR] Erro ao tentar método alternativo:', e);
+            console.error('Erro ao tentar método alternativo de extração:', e);
             text = JSON.stringify(text);
           }
         }
@@ -108,10 +99,9 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
     if (typeof text === 'string') {
       // Verificar se não é a string "[object Object]"
       if (text === '[object Object]') {
-        console.error('[PDF EXTRACTOR] getText() retornou [object Object]!');
+        console.error('Erro: getText() retornou [object Object]');
         return '';
       }
-      console.log('[PDF EXTRACTOR] Texto extraído (primeiros 100 chars):', text.substring(0, 100));
       return text;
     } else if (text && typeof text.toString === 'function') {
       const str = text.toString();
@@ -121,7 +111,7 @@ export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
     }
     
     // Último recurso
-    console.error('[PDF EXTRACTOR] Não foi possível extrair texto válido');
+    console.error('Erro: Não foi possível extrair texto válido do PDF');
     return String(text || '');
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
