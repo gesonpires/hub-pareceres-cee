@@ -849,6 +849,30 @@
             }
         }
         
+        // Função para copiar texto extraído
+        function copiarTextoExtraido(id) {
+            const textoDiv = document.getElementById(`texto-extraido-${id}`);
+            if (textoDiv) {
+                const texto = textoDiv.textContent || textoDiv.innerText;
+                navigator.clipboard.writeText(texto).then(() => {
+                    // Mostrar feedback visual
+                    const btn = event.target;
+                    const textoOriginal = btn.textContent;
+                    btn.textContent = '✓ Copiado!';
+                    btn.style.backgroundColor = '#28a745';
+                    btn.style.color = '#fff';
+                    setTimeout(() => {
+                        btn.textContent = textoOriginal;
+                        btn.style.backgroundColor = '';
+                        btn.style.color = '';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    alert('Erro ao copiar texto. Tente selecionar e copiar manualmente.');
+                });
+            }
+        }
+        
         function removerArquivo(id) {
             const itemDiv = document.getElementById(`arquivo-${id}`);
             if (itemDiv) {
