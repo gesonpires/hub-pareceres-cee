@@ -298,6 +298,11 @@
             document.getElementById('nav-user-name').textContent = user.email;
         }
         
+        // Verificar permissões - bloquear acesso de perfil consulta
+        if (user.perfil === 'consulta') {
+            window.location.href = '/403.html';
+        }
+        
         function fazerLogout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
