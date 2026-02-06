@@ -6,9 +6,13 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:seed": "tsx prisma/seed-sql.ts",
+    "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "dev": "echo 'Backend e frontend ainda não configurados'"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^7.3.0",

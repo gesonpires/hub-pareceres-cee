@@ -1,18 +1,22 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaClient as PrismaClientType } from '@prisma/client';
 import Database from 'better-sqlite3';
+import { PrismaClientOptions } from '@prisma/client/runtime/library';
 import 'dotenv/config';
 
+// Para Prisma 7 com SQLite, precisamos usar o adapter
 const databaseUrl = process.env.DATABASE_URL || 'file:./dev.db';
-const sqliteDb = new Database(databaseUrl.replace('file:', ''));
+const sqlite = new Database(databaseUrl.replace('file:', ''));
+
+// Criar adapter do SQLite manualmente
+const adapter = {
+  kind: 'sqlite' as const,
+  url: databaseUrl,
+  database: sqlite,
+};
 
 const prisma = new PrismaClient({
-  adapter: {
-    kind: 'sqlite',
-    url: databaseUrl,
-    database: sqliteDb as any,
-  },
-} as any);
+  adapter: adapter as any,
+} as PrismaClientOptions);
 
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...');
