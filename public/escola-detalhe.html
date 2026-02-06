@@ -119,7 +119,27 @@
         
         h1 {
             color: #333;
-            margin-bottom: 8px;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .header-subtitle {
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
         
         .escola-info {
@@ -294,11 +314,14 @@
     
     <div class="container">
         <div class="header">
-            <div>
+            <div class="header-info">
                 <h1 id="escola-nome">Carregando...</h1>
-                <a href="/escolas.html" class="btn btn-secondary">← Voltar para Escolas</a>
+                <p class="header-subtitle" id="header-subtitle">Detalhes da escola e atos autorizativos</p>
             </div>
-            <button class="btn btn-primary" id="btn-novo-ato" onclick="abrirFormularioAto()" style="display: none;">+ Novo Ato Autorizativo</button>
+            <div class="header-actions">
+                <a href="/escolas.html" class="btn btn-secondary">← Voltar</a>
+                <button class="btn btn-primary" id="btn-novo-ato" onclick="abrirFormularioAto()" style="display: none;">+ Novo Ato Autorizativo</button>
+            </div>
         </div>
         
         <div id="error-message" class="error" style="display: none;"></div>
