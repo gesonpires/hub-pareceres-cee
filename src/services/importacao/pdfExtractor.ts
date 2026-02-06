@@ -1,10 +1,12 @@
-import pdf from 'pdf-parse';
 import fs from 'fs';
+
+// pdf-parse não tem export default, precisa usar require
+const pdfParse = require('pdf-parse');
 
 export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
   try {
     const buffer = fs.readFileSync(caminhoArquivo);
-    const data = await pdf(buffer);
+    const data = await pdfParse(buffer);
     return data.text || '';
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
@@ -14,7 +16,7 @@ export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
 
 export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdf(buffer);
+    const data = await pdfParse(buffer);
     return data.text || '';
   } catch (error) {
     console.error('Erro ao extrair texto do PDF:', error);
