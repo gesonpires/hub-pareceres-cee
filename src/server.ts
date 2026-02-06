@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import escolasRoutes from './routes/escolas';
 import atosRoutes from './routes/atos';
 import pareceresRoutes from './routes/pareceres';
+import importacaoRoutes from './routes/importacao';
 import { authenticateToken, requirePerfil } from './middleware/auth';
 import { listarAtos, criarAto } from './controllers/atosController';
 import { errorHandler } from './middleware/errorHandler';
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/escolas', escolasRoutes);
 app.use('/api/atos', atosRoutes);
 app.use('/api/pareceres', pareceresRoutes);
+app.use('/api/importacao', importacaoRoutes);
 
 // Rotas de atos vinculadas a escolas
 app.get('/api/escolas/:escolaId/atos', authenticateToken, listarAtos);
@@ -64,6 +66,10 @@ app.get('/parecer-form.html', (req, res) => {
 
 app.get('/parecer-view.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/parecer-view.html'));
+});
+
+app.get('/importar-pareceres.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/importar-pareceres.html'));
 });
 
 app.get('/dashboard.html', (req, res) => {

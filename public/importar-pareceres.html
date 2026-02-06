@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Pareceres - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+        }
+        
+        .nav-logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav-logo:hover {
+            color: #ecf0f1;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .nav-link {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+        
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-user span {
+            font-size: 14px;
+            color: #ecf0f1;
+        }
+        
+        .btn-logout {
+            padding: 6px 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .upload-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e8e8ff;
+        }
+        
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+        
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .arquivos-lista {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .arquivo-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: #fafafa;
+        }
+        
+        .arquivo-item.processando {
+            opacity: 0.6;
+        }
+        
+        .arquivo-item.erro {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+        
+        .arquivo-item.pronto {
+            border-color: #28a745;
+            background: #f5fff5;
+        }
+        
+        .arquivo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .arquivo-nome {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .arquivo-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-processando {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-erro {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-pronto {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .formulario-revisao {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group label .required {
+            color: #dc3545;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .texto-extraido {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            color: #666;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .sugestao-badge {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .busca-escola {
+            position: relative;
+        }
+        
+        .sugestoes-escola {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .sugestao-escola-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .sugestao-escola-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .sugestao-escola-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/dashboard.html" class="nav-logo">Hub Pareceres CEE</a>
+            <div class="nav-links">
+                <a href="/dashboard.html" class="nav-link">Início</a>
+                <a href="/escolas.html" class="nav-link">Escolas</a>
+                <a href="/pareceres.html" class="nav-link">Pareceres</a>
+            </div>
+            <div class="nav-user">
+                <span id="nav-user-name">Usuário</span>
+                <button class="btn-logout" onclick="window.fazerLogout()">Sair</button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Importar Pareceres</h1>
+            <p class="subtitle">Faça upload de arquivos PDF ou DOCX para importar pareceres. Revise e confirme os dados antes de importar.</p>
+        </div>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        <div id="success-message" class="success-message" style="display: none;"></div>
+        
+        <div class="upload-section">
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Clique ou arraste arquivos aqui</div>
+                <div class="upload-hint">Formatos suportados: PDF, DOCX (máximo 10 arquivos, 10MB cada)</div>
+                <input type="file" id="file-input" multiple accept=".pdf,.docx" />
+            </div>
+        </div>
+        
+        <div class="arquivos-lista" id="arquivos-lista" style="display: none;">
+            <h2 style="margin-bottom: 16px; color: #333;">Arquivos Processados</h2>
+            <div id="arquivos-container"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        let arquivosProcessados = [];
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Carregar informações do usuário
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const navUserName = document.getElementById('nav-user-name');
+        if (user.email && navUserName) {
+            navUserName.textContent = user.email;
+        }
+        
+        // Verificar permissões - bloquear acesso de perfil consulta
+        if (user.perfil === 'consulta') {
+            window.location.href = '/403.html';
+        }
+        
+        window.fazerLogout = function() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        };
+        
+        // Upload area
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            processarArquivos(files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            processarArquivos(files);
+        });
+        
+        async function processarArquivos(files) {
+            if (files.length === 0) return;
+            
+            // Filtrar apenas PDF e DOCX
+            const arquivosValidos = files.filter(f => 
+                f.name.toLowerCase().endsWith('.pdf') || 
+                f.name.toLowerCase().endsWith('.docx')
+            );
+            
+            if (arquivosValidos.length === 0) {
+                mostrarErro('Por favor, selecione apenas arquivos PDF ou DOCX.');
+                return;
+            }
+            
+            if (arquivosValidos.length > 10) {
+                mostrarErro('Máximo de 10 arquivos por vez.');
+                return;
+            }
+            
+            const formData = new FormData();
+            arquivosValidos.forEach(file => {
+                formData.append('arquivos', file);
+            });
+            
+            try {
+                mostrarErro('');
+                mostrarSucesso('');
+                
+                const response = await fetch(`${API_URL}/importacao/upload`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erro ao processar arquivos');
+                }
+                
+                const data = await response.json();
+                arquivosProcessados = data.arquivos;
+                exibirArquivos();
+            } catch (error) {
+                mostrarErro('Erro ao processar arquivos: ' + error.message);
+            }
+        }
+        
+        function exibirArquivos() {
+            const container = document.getElementById('arquivos-container');
+            const lista = document.getElementById('arquivos-lista');
+            
+            container.innerHTML = '';
+            lista.style.display = 'block';
+            
+            arquivosProcessados.forEach(arquivo => {
+                const item = criarItemArquivo(arquivo);
+                container.appendChild(item);
+                
+                // Carregar preview se não houver erro
+                if (!arquivo.temErro) {
+                    carregarPreview(arquivo.id);
+                }
+            });
+        }
+        
+        function criarItemArquivo(arquivo) {
+            const div = document.createElement('div');
+            div.className = `arquivo-item ${arquivo.temErro ? 'erro' : 'processando'}`;
+            div.id = `arquivo-${arquivo.id}`;
+            
+            const statusClass = arquivo.temErro ? 'status-erro' : 'status-processando';
+            const statusText = arquivo.temErro ? 'Erro' : 'Processando...';
+            
+            div.innerHTML = `
+                <div class="arquivo-header">
+                    <div class="arquivo-nome">${arquivo.nomeArquivo}</div>
+                    <div class="arquivo-status ${statusClass}">${statusText}</div>
+                </div>
+                ${arquivo.temErro ? `
+                    <div class="error-message">${arquivo.erro}</div>
+                ` : `
+                    <div id="preview-${arquivo.id}">
+                        <div class="loading"></div> Carregando preview...
+                    </div>
+                `}
+            `;
+            
+            return div;
+        }
+        
+        async function carregarPreview(id) {
+            try {
+                const response = await fetch(`${API_URL}/importacao/preview/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar preview');
+                }
+                
+                const arquivo = await response.json();
+                exibirPreview(id, arquivo);
+            } catch (error) {
+                const previewDiv = document.getElementById(`preview-${id}`);
+                if (previewDiv) {
+                    previewDiv.innerHTML = `<div class="error-message">Erro ao carregar preview: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        function exibirPreview(id, arquivo) {
+            const itemDiv = document.getElementById(`arquivo-${id}`);
+            const previewDiv = document.getElementById(`preview-${id}`);
+            
+            itemDiv.classList.remove('processando');
+            itemDiv.classList.add('pronto');
+            
+            const dados = arquivo.dadosSugeridos;
+            
+            previewDiv.innerHTML = `
+                <div class="formulario-revisao">
+                    <div class="form-group">
+                        <label>Escola <span class="required">*</span></label>
+                        <div class="busca-escola">
+                            <input type="text" 
+                                   id="escola-busca-${id}" 
+                                   placeholder="Digite o nome da escola..."
+                                   value="${dados.escolaNome || ''}"
+                                   oninput="buscarEscolas('${id}', this.value)" />
+                            <div class="sugestoes-escola" id="sugestoes-escola-${id}"></div>
+                        </div>
+                        <input type="hidden" id="escola-id-${id}" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Número do Parecer <span class="required">*</span>
+                            ${dados.numeroParecer ? '<span class="sugestao-badge">Sugerido</span>' : ''}
+                        </label>
+                        <input type="number" 
+                               id="numero-parecer-${id}" 
+                               min="1"
+                               value="${dados.numeroParecer || ''}" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ano do Parecer <span class="required">*</span>
+                            ${dados.anoParecer ? '<span class="sugestao-badge">Sugerido</span>' : ''}
+                        </label>
+                        <input type="number" 
+                               id="ano-parecer-${id}" 
+                               min="2000" 
+                               max="2100"
+                               value="${dados.anoParecer || ''}" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Data do Parecer <span class="required">*</span>
+                            ${dados.dataParecer ? '<span class="sugestao-badge">Sugerido</span>' : ''}
+                        </label>
+                        <input type="date" 
+                               id="data-parecer-${id}" 
+                               value="${dados.dataParecer || ''}" />
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Ementa <span class="required">*</span>
+                            ${dados.ementa ? '<span class="sugestao-badge">Sugerido</span>' : ''}
+                        </label>
+                        <textarea id="ementa-${id}" 
+                                  placeholder="Descreva a ementa do parecer">${dados.ementa || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="status-${id}">
+                            <option value="rascunho">Rascunho</option>
+                            <option value="finalizado">Finalizado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Texto Extraído (referência)</label>
+                        <div class="texto-extraido">${arquivo.textoExtraido.substring(0, 2000)}${arquivo.textoExtraido.length > 2000 ? '...' : ''}</div>
+                    </div>
+                    
+                    <div class="form-group full-width" style="margin-top: 16px;">
+                        <button class="btn btn-success" onclick="importarParecer('${id}')">
+                            ✓ Importar Parecer
+                        </button>
+                        <button class="btn btn-secondary" onclick="removerArquivo('${id}')" style="margin-left: 8px;">
+                            ✗ Remover
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Atualizar status
+            const statusDiv = itemDiv.querySelector('.arquivo-status');
+            statusDiv.className = 'arquivo-status status-pronto';
+            statusDiv.textContent = 'Pronto para importar';
+        }
+        
+        let timeoutBusca = null;
+        async function buscarEscolas(id, nome) {
+            clearTimeout(timeoutBusca);
+            
+            if (!nome || nome.length < 2) {
+                document.getElementById(`sugestoes-escola-${id}`).style.display = 'none';
+                return;
+            }
+            
+            timeoutBusca = setTimeout(async () => {
+                try {
+                    const response = await fetch(`${API_URL}/importacao/buscar-escolas?nome=${encodeURIComponent(nome)}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) return;
+                    
+                    const data = await response.json();
+                    exibirSugestoesEscola(id, data.escolas);
+                } catch (error) {
+                    console.error('Erro ao buscar escolas:', error);
+                }
+            }, 300);
+        }
+        
+        function exibirSugestoesEscola(id, escolas) {
+            const sugestoesDiv = document.getElementById(`sugestoes-escola-${id}`);
+            
+            if (escolas.length === 0) {
+                sugestoesDiv.style.display = 'none';
+                return;
+            }
+            
+            sugestoesDiv.innerHTML = escolas.map(escola => `
+                <div class="sugestao-escola-item" onclick="selecionarEscola('${id}', '${escola.id}', '${escola.nomeOficial.replace(/'/g, "\\'")}')">
+                    <strong>${escola.nomeOficial}</strong>
+                    ${escola.municipio ? `<br><small>${escola.municipio}</small>` : ''}
+                </div>
+            `).join('');
+            
+            sugestoesDiv.style.display = 'block';
+        }
+        
+        function selecionarEscola(id, escolaId, nomeEscola) {
+            document.getElementById(`escola-id-${id}`).value = escolaId;
+            document.getElementById(`escola-busca-${id}`).value = nomeEscola;
+            document.getElementById(`sugestoes-escola-${id}`).style.display = 'none';
+        }
+        
+        async function importarParecer(id) {
+            const escolaId = document.getElementById(`escola-id-${id}`).value;
+            const numeroParecer = document.getElementById(`numero-parecer-${id}`).value;
+            const anoParecer = document.getElementById(`ano-parecer-${id}`).value;
+            const dataParecer = document.getElementById(`data-parecer-${id}`).value;
+            const ementa = document.getElementById(`ementa-${id}`).value.trim();
+            const status = document.getElementById(`status-${id}`).value;
+            
+            // Validação
+            if (!escolaId || !numeroParecer || !anoParecer || !dataParecer || !ementa) {
+                mostrarErro('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/importacao/confirmar/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        escolaId,
+                        numeroParecer: parseInt(numeroParecer),
+                        anoParecer: parseInt(anoParecer),
+                        dataParecer,
+                        ementa,
+                        status
+                    })
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Erro ao importar parecer');
+                }
+                
+                mostrarSucesso('Parecer importado com sucesso!');
+                
+                // Remover item da lista após 1.5s
+                setTimeout(() => {
+                    removerArquivo(id);
+                }, 1500);
+            } catch (error) {
+                mostrarErro('Erro ao importar parecer: ' + error.message);
+            }
+        }
+        
+        function removerArquivo(id) {
+            const itemDiv = document.getElementById(`arquivo-${id}`);
+            if (itemDiv) {
+                itemDiv.remove();
+            }
+            
+            arquivosProcessados = arquivosProcessados.filter(a => a.id !== id);
+            
+            if (arquivosProcessados.length === 0) {
+                document.getElementById('arquivos-lista').style.display = 'none';
+            }
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = mensagem;
+            errorDiv.style.display = mensagem ? 'block' : 'none';
+        }
+        
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = mensagem ? 'block' : 'none';
+        }
+        
+        // Fechar sugestões ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.busca-escola')) {
+                document.querySelectorAll('.sugestoes-escola').forEach(div => {
+                    div.style.display = 'none';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
