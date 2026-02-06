@@ -546,7 +546,7 @@
                     
                     if (result.atosIncompletos && result.atosIncompletos.length > 0) {
                         mensagemErro += '\n\n**Atos com dados incompletos:**\n';
-                        result.atosIncompletos.forEach((ato: any) => {
+                        result.atosIncompletos.forEach(function(ato) {
                             mensagemErro += `- ${ato.tipoAto} Nº${ato.numeroAto} de ${ato.dataPublicacao} — faltam: ${ato.camposFaltantes.join(', ')}\n`;
                         });
                     }
