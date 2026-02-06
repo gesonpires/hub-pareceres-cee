@@ -22,13 +22,14 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
   // Tentar extrair número e ano do parecer
   // Padrões: "Parecer Nº 123/2024", "Parecer nº 123/2024", "Parecer 123/2024", etc.
   // Também: "CEE_SC_013_2025", "CEE/SC 013/2025", etc.
+  // Priorizar padrão CEE_SC_XXX_YYYY que aparece no nome do arquivo
   const parecerPatterns = [
-    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s*\/\s*(\d{4})/i,
-    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s+(?:de\s+)?(\d{4})/i,
     /cee[_\s\/]*sc[_\s]*(\d+)[_\s]*(\d{4})/i,
     /parecer\s*cee[_\s\/]*sc[_\s]*(\d+)[_\s]*(\d{4})/i,
-    /(\d{3,4})\s*\/\s*(\d{4})/,
-    /n[º°]?\s*(\d+)\s*\/\s*(\d{4})/i
+    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s*\/\s*(\d{4})/i,
+    /parecer\s*(?:n[º°]|nº|n[°]|n\.?\s*)?\s*(\d+)\s+(?:de\s+)?(\d{4})/i,
+    /n[º°]?\s*(\d+)\s*\/\s*(\d{4})/i,
+    /(\d{3,4})\s*\/\s*(\d{4})/
   ];
 
   for (const pattern of parecerPatterns) {
