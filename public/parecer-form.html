@@ -399,16 +399,35 @@
                     return;
                 }
                 
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar escolas');
+                }
+                
                 const data = await response.json();
                 const select = document.getElementById('escolaId');
                 
-                data.escolas.forEach(escola => {
+                // Limpar opções existentes (exceto a primeira placeholder)
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+                
+                if (data.escolas && data.escolas.length > 0) {
+                    data.escolas.forEach(escola => {
+                        const option = document.createElement('option');
+                        option.value = escola.id;
+                        option.textContent = escola.nomeOficial;
+                        select.appendChild(option);
+                    });
+                } else {
+                    // Se não houver escolas, mostrar mensagem
                     const option = document.createElement('option');
-                    option.value = escola.id;
-                    option.textContent = escola.nomeOficial;
+                    option.value = '';
+                    option.textContent = 'Nenhuma escola cadastrada';
+                    option.disabled = true;
                     select.appendChild(option);
-                });
+                }
             } catch (error) {
+                console.error('Erro ao carregar escolas:', error);
                 mostrarErro('Erro ao carregar escolas: ' + error.message);
             }
         }
