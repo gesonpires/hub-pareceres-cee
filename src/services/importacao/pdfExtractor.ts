@@ -7,7 +7,9 @@ const PDFParse = pdfModule.PDFParse;
 export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
   try {
     const buffer = fs.readFileSync(caminhoArquivo);
-    const parser = new PDFParse(buffer);
+    // pdf-parse v2.4.5 requer Uint8Array ao invés de Buffer
+    const uint8Array = new Uint8Array(buffer);
+    const parser = new PDFParse(uint8Array);
     await parser.load();
     const text = parser.getText();
     return text || '';
@@ -19,7 +21,9 @@ export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
 
 export async function extrairTextoPDFBuffer(buffer: Buffer): Promise<string> {
   try {
-    const parser = new PDFParse(buffer);
+    // pdf-parse v2.4.5 requer Uint8Array ao invés de Buffer
+    const uint8Array = new Uint8Array(buffer);
+    const parser = new PDFParse(uint8Array);
     await parser.load();
     const text = parser.getText();
     return text || '';
