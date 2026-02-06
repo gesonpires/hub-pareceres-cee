@@ -314,6 +314,7 @@
                     <td>${escola.redeEnsino || '-'}</td>
                     <td><span class="badge badge-${escola.situacao}">${escola.situacao}</span></td>
                     <td class="actions">
+                        <a href="/escola-detalhe.html?id=${escola.id}" class="btn btn-sm btn-secondary">Ver Detalhes</a>
                         <button class="btn btn-sm btn-edit" onclick="editarEscola('${escola.id}')">Editar</button>
                         ${escola.situacao === 'ativa' ? `<button class="btn btn-sm btn-deactivate" onclick="desativarEscola('${escola.id}')">Desativar</button>` : ''}
                     </td>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Ato Autorizativo - Hub Pareceres CEE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group label .required {
+            color: #dc3545;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-group .error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .form-group .help-text {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .error-message ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        
+        .field-error {
+            border-color: #dc3545 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="titulo">Novo Ato Autorizativo</h1>
+        
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        <div id="success-message" class="success-message" style="display: none;"></div>
+        
+        <form id="ato-form" onsubmit="salvarAto(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo do Ato <span class="required">*</span></label>
+                    <select id="tipoAto" required>
+                        <option value="">Selecione...</option>
+                        <option value="Parecer">Parecer</option>
+                        <option value="Resolução">Resolução</option>
+                        <option value="Portaria">Portaria</option>
+                        <option value="Deliberação">Deliberação</option>
+                    </select>
+                    <div class="error" id="error-tipoAto"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Número do Ato <span class="required">*</span></label>
+                    <input type="text" id="numeroAto" required>
+                    <div class="error" id="error-numeroAto"></div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Ano do Ato</label>
+                    <input type="number" id="anoAto" min="1900" max="2100">
+                </div>
+                
+                <div class="form-group">
+                    <label>Data de Publicação <span class="required">*</span></label>
+                    <input type="date" id="dataPublicacao" required>
+                    <div class="error" id="error-dataPublicacao"></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Órgão Emissor <span class="required">*</span></label>
+                <input type="text" id="orgaoEmissor" required placeholder="Ex: CEE-SC">
+                <div class="error" id="error-orgaoEmissor"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Ementa/Resumo</label>
+                <input type="text" id="ementaResumo" placeholder="Resumo breve do ato">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Início de Vigência</label>
+                    <input type="date" id="inicioVigencia">
+                </div>
+                
+                <div class="form-group">
+                    <label>Fim de Vigência</label>
+                    <input type="date" id="fimVigencia">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Status de Vigência <span class="required">*</span></label>
+                <select id="statusVigencia" required>
+                    <option value="">Selecione...</option>
+                    <option value="vigente">Vigente</option>
+                    <option value="expirado">Expirado</option>
+                    <option value="revogado">Revogado</option>
+                </select>
+                <div class="error" id="error-statusVigencia"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Observações <span class="required">*</span></label>
+                <textarea id="observacoes" required placeholder="Texto completo das observações do ato autorizativo"></textarea>
+                <div class="help-text">Este campo é obrigatório e será usado na geração do texto "ATOS AUTORIZATIVOS"</div>
+                <div class="error" id="error-observacoes"></div>
+            </div>
+            
+            <div class="buttons">
+                <button type="button" class="btn btn-secondary" onclick="voltar()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let token = localStorage.getItem('token');
+        let escolaId = null;
+        let atoId = null;
+        
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Verificar parâmetros da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        escolaId = urlParams.get('escolaId');
+        atoId = urlParams.get('id');
+        
+        if (!escolaId) {
+            window.location.href = '/escolas.html';
+        }
+        
+        if (atoId) {
+            document.getElementById('titulo').textContent = 'Editar Ato Autorizativo';
+            carregarAto(atoId);
+        }
+        
+        async function carregarAto(id) {
+            try {
+                const response = await fetch(`${API_URL}/atos/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para editar atos.');
+                    return;
+                }
+                
+                const ato = await response.json();
+                
+                document.getElementById('tipoAto').value = ato.tipoAto || '';
+                document.getElementById('numeroAto').value = ato.numeroAto || '';
+                document.getElementById('anoAto').value = ato.anoAto || '';
+                document.getElementById('dataPublicacao').value = ato.dataPublicacao ? ato.dataPublicacao.split('T')[0] : '';
+                document.getElementById('orgaoEmissor').value = ato.orgaoEmissor || '';
+                document.getElementById('ementaResumo').value = ato.ementaResumo || '';
+                document.getElementById('inicioVigencia').value = ato.inicioVigencia ? ato.inicioVigencia.split('T')[0] : '';
+                document.getElementById('fimVigencia').value = ato.fimVigencia ? ato.fimVigencia.split('T')[0] : '';
+                document.getElementById('statusVigencia').value = ato.statusVigencia || '';
+                document.getElementById('observacoes').value = ato.observacoes || '';
+            } catch (error) {
+                mostrarErro('Erro ao carregar ato: ' + error.message);
+            }
+        }
+        
+        async function salvarAto(event) {
+            event.preventDefault();
+            
+            const dados = {
+                tipoAto: document.getElementById('tipoAto').value.trim(),
+                numeroAto: document.getElementById('numeroAto').value.trim(),
+                anoAto: document.getElementById('anoAto').value ? parseInt(document.getElementById('anoAto').value) : null,
+                dataPublicacao: document.getElementById('dataPublicacao').value,
+                orgaoEmissor: document.getElementById('orgaoEmissor').value.trim(),
+                ementaResumo: document.getElementById('ementaResumo').value.trim() || null,
+                inicioVigencia: document.getElementById('inicioVigencia').value || null,
+                fimVigencia: document.getElementById('fimVigencia').value || null,
+                statusVigencia: document.getElementById('statusVigencia').value,
+                observacoes: document.getElementById('observacoes').value.trim(),
+            };
+            
+            // Limpar erros anteriores
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            
+            try {
+                const url = atoId 
+                    ? `${API_URL}/atos/${atoId}`
+                    : `${API_URL}/escolas/${escolaId}/atos`;
+                
+                const method = atoId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dados)
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    mostrarErro('Você não tem permissão para criar/editar atos.');
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    mostrarSucesso(atoId ? 'Ato atualizado com sucesso!' : 'Ato criado com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = `/escola-detalhe.html?id=${escolaId}`;
+                    }, 1500);
+                } else {
+                    // Mostrar erros de validação
+                    if (result.camposFaltantes && result.camposFaltantes.length > 0) {
+                        mostrarErroValidacao(result.error, result.camposFaltantes);
+                    } else if (result.error) {
+                        mostrarErro(result.error);
+                    }
+                }
+            } catch (error) {
+                mostrarErro('Erro ao salvar ato: ' + error.message);
+            }
+        }
+        
+        function mostrarErro(mensagem) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerHTML = mensagem;
+            errorDiv.style.display = 'block';
+        }
+        
+        function mostrarErroValidacao(mensagem, camposFaltantes) {
+            const errorDiv = document.getElementById('error-message');
+            let html = `<strong>${mensagem}</strong><ul>`;
+            
+            camposFaltantes.forEach(campo => {
+                const nomeCampo = {
+                    tipoAto: 'Tipo do ato',
+                    numeroAto: 'Número do ato',
+                    dataPublicacao: 'Data de publicação',
+                    orgaoEmissor: 'Órgão emissor',
+                    statusVigencia: 'Status de vigência',
+                    observacoes: 'Observações',
+                }[campo] || campo;
+                
+                html += `<li>${nomeCampo}</li>`;
+                
+                // Marcar campo com erro visual
+                const campoElement = document.getElementById(campo);
+                if (campoElement) {
+                    campoElement.classList.add('field-error');
+                    const errorElement = document.getElementById(`error-${campo}`);
+                    if (errorElement) {
+                        errorElement.textContent = 'Campo obrigatório';
+                    }
+                }
+            });
+            
+            html += '</ul>';
+            errorDiv.innerHTML = html;
+            errorDiv.style.display = 'block';
+        }
+        
+        function mostrarSucesso(mensagem) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = mensagem;
+            successDiv.style.display = 'block';
+        }
+        
+        function voltar() {
+            window.location.href = `/escola-detalhe.html?id=${escolaId}`;
+        }
+    </script>
+</body>
+</html>
