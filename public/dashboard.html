@@ -318,9 +318,29 @@
                     document.getElementById('total-pareceres').textContent = pareceresData.total || 0;
                 }
                 
-                // Contar atos (precisa iterar pelas escolas)
-                // Por enquanto, deixar como "-" ou implementar endpoint específico
-                document.getElementById('total-atos').textContent = '-';
+                // Contar atos (iterar pelas escolas)
+                let totalAtos = 0;
+                if (escolasResponse.ok) {
+                    const escolasData = await escolasResponse.json();
+                    if (escolasData.escolas && escolasData.escolas.length > 0) {
+                        for (const escola of escolasData.escolas) {
+                            try {
+                                const atosResponse = await fetch(`${API_URL}/escolas/${escola.id}/atos`, {
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`
+                                    }
+                                });
+                                if (atosResponse.ok) {
+                                    const atosData = await atosResponse.json();
+                                    totalAtos += atosData.total || 0;
+                                }
+                            } catch (error) {
+                                console.error(`Erro ao contar atos da escola ${escola.id}:`, error);
+                            }
+                        }
+                    }
+                }
+                document.getElementById('total-atos').textContent = totalAtos;
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
             }
