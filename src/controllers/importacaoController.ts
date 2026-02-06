@@ -91,12 +91,21 @@ export const obterPreview = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Arquivo não encontrado' });
     }
 
-    // Garantir que textoExtraido seja string
+    // Garantir que textoExtraido seja string e não uma Promise
+    let textoExtraidoString = '';
+    if (typeof arquivo.textoExtraido === 'string') {
+      textoExtraidoString = arquivo.textoExtraido;
+    } else if (arquivo.textoExtraido && typeof arquivo.textoExtraido.then === 'function') {
+      // Se for uma Promise, isso é um erro - não deveria acontecer
+      console.error('textoExtraido é uma Promise! Isso não deveria acontecer.');
+      textoExtraidoString = '';
+    } else {
+      textoExtraidoString = String(arquivo.textoExtraido || '');
+    }
+    
     const arquivoSerializado = {
       ...arquivo,
-      textoExtraido: typeof arquivo.textoExtraido === 'string' 
-        ? arquivo.textoExtraido 
-        : String(arquivo.textoExtraido || '')
+      textoExtraido: textoExtraidoString
     };
 
     res.json(arquivoSerializado);

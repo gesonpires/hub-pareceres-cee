@@ -65,6 +65,28 @@ export async function processarArquivo(
         }
       }
     }
+    
+    // Tentar extrair nome da escola do nome do arquivo se não encontrou no texto
+    // Padrão comum: ..._NomeEscola_Cidade.pdf
+    if (!dadosSugeridos.escolaNome) {
+      // Remover extensão e padrão CEE_SC_XXX_YYYY do início
+      const nomeLimpo = nomeArquivo
+        .replace(/\.(pdf|docx?)$/i, '')
+        .replace(/^parecer\s*cee[_\s\/]*sc[_\s]*\d+[_\s]*\d{4}[_\s]*/i, '')
+        .replace(/^cee[_\s\/]*sc[_\s]*\d+[_\s]*\d{4}[_\s]*/i, '');
+      
+      // Tentar extrair nome da escola (geralmente antes da última parte que é a cidade)
+      const partes = nomeLimpo.split(/[_\s]+/);
+      if (partes.length >= 2) {
+        // Pegar todas as partes exceto a última (que geralmente é a cidade)
+        const possivelEscola = partes.slice(0, -1).join(' ');
+        if (possivelEscola.length > 5 && possivelEscola.length < 200) {
+          dadosSugeridos.escolaNome = possivelEscola;
+        }
+      } else if (partes.length === 1 && partes[0].length > 5) {
+        dadosSugeridos.escolaNome = partes[0];
+      }
+    }
 
     return {
       nomeArquivo,

@@ -46,26 +46,43 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
   }
 
   // Tentar extrair data do parecer
-  // Padrões: "Data: 15/03/2024", "15/03/2024", etc.
+  // Padrões: "Data: 15/03/2024", "15/03/2024", "Data do Parecer:", etc.
   const dataPatterns = [
-    /(?:data|data\s+do\s+parecer)[\s:]*(\d{2})\/(\d{2})\/(\d{4})/i,
+    /(?:data|data\s+do\s+parecer|data\s+de\s+publica[çc][ãa]o)[\s:]*(\d{2})\/(\d{2})\/(\d{4})/i,
+    /(?:florian[óo]polis|floripa|sc)[\s,]*(\d{2})\/(\d{2})\/(\d{4})/i, // Data após localização
     /(\d{2})\/(\d{2})\/(\d{4})/g
   ];
 
   for (const pattern of dataPatterns) {
-    const matches = textoNormalizado.match(pattern);
+    const matches = texto.match(pattern);
     if (matches) {
       // Pegar a primeira data encontrada que parece ser uma data válida
-      const match = matches[0].match(/(\d{2})\/(\d{2})\/(\d{4})/);
-      if (match) {
-        const dia = parseInt(match[1]);
-        const mes = parseInt(match[2]);
-        const ano = parseInt(match[3]);
-        
-        // Validar se é uma data razoável (ano entre 2000 e 2100)
-        if (ano >= 2000 && ano <= 2100 && mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31) {
-          dados.dataParecer = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
-          break;
+      let matchData = null;
+      if (Array.isArray(matches)) {
+        matchData = matches.find(m => {
+          const dateMatch = m.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+          if (dateMatch) {
+            const ano = parseInt(dateMatch[3]);
+            return ano >= 2000 && ano <= 2100;
+          }
+          return false;
+        });
+      } else {
+        matchData = matches;
+      }
+      
+      if (matchData) {
+        const dateMatch = matchData.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (dateMatch) {
+          const dia = parseInt(dateMatch[1]);
+          const mes = parseInt(dateMatch[2]);
+          const ano = parseInt(dateMatch[3]);
+          
+          // Validar se é uma data razoável (ano entre 2000 e 2100)
+          if (ano >= 2000 && ano <= 2100 && mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31) {
+            dados.dataParecer = `${ano}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+            break;
+          }
         }
       }
     }
@@ -122,7 +139,8 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
   const escolaPatterns = [
     /(?:escola|institui[çc][ãa]o|estabelecimento|colegio|col[ée]gio)[\s:]*([^\n]{10,200})/i,
     /(?:denomina[çc][ãa]o)[\s:]*([^\n]{10,200})/i,
-    /(?:requerente|requerido)[\s:]*([^\n]{10,200})/i
+    /(?:requerente|requerido)[\s:]*([^\n]{10,200})/i,
+    /(?:mantenedora|mantida)[\s:]*([^\n]{10,200})/i
   ];
 
   for (const pattern of escolaPatterns) {
@@ -130,7 +148,7 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
     if (match && match[1]) {
       let escolaNome = match[1].trim();
       // Pegar até o primeiro ponto, vírgula, quebra de linha ou palavra-chave
-      escolaNome = escolaNome.split(/[.,;\n]|(?:munic[ií]pio|cnpj|codigo)/i)[0].trim();
+      escolaNome = escolaNome.split(/[.,;\n]|(?:munic[ií]pio|cnpj|codigo|endere[çc]o|telefone)/i)[0].trim();
       // Remover espaços excessivos
       escolaNome = escolaNome.replace(/\s+/g, ' ').trim();
       if (escolaNome.length > 5 && escolaNome.length < 200) {
@@ -140,7 +158,8 @@ export function parsearParecer(texto: string): DadosParecerSugeridos {
     }
   }
   
-  // Se não encontrou, tentar extrair do nome do arquivo (se disponível)
+  // Se não encontrou no texto, tentar extrair do nome do arquivo
+  // Padrão comum: NomeArquivo_..._NomeEscola_Cidade.pdf
   // Isso será feito no importadorPareceres se necessário
 
   return dados;
