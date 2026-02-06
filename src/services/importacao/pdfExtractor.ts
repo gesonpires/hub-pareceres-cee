@@ -1,7 +1,11 @@
 import fs from 'fs';
 
-// pdf-parse não tem export default, precisa usar require
-const pdfParse = require('pdf-parse');
+// pdf-parse exporta como objeto, a função principal está em PDFParse
+// Mas também pode exportar diretamente dependendo da versão
+const pdfModule = require('pdf-parse');
+const pdfParse = (typeof pdfModule === 'function') 
+  ? pdfModule 
+  : (pdfModule.PDFParse || pdfModule.default || pdfModule);
 
 export async function extrairTextoPDF(caminhoArquivo: string): Promise<string> {
   try {
