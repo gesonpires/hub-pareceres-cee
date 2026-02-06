@@ -202,8 +202,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             padding: 24px;
             transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            text-decoration: none;
             color: inherit;
             display: block;
         }
@@ -213,21 +211,61 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        .card-link:hover {
+            text-decoration: none;
+        }
+        
+        .btn-card-action {
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background 0.3s;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        
+        .btn-card-action:hover {
+            background: #5568d3;
+        }
+        
         .card-icon {
             font-size: 48px;
-            margin-bottom: 16px;
+            margin-bottom: 0;
         }
         
         .card-title {
             font-size: 20px;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 0;
         }
         
         .card-description {
             color: #666;
             font-size: 14px;
             line-height: 1.6;
+            margin-top: 12px;
         }
         
         .card-escolas {
@@ -325,23 +363,37 @@
         </div>
         
         <div class="cards-section">
-            <a href="/escolas.html" class="card card-escolas">
-                <div class="card-icon">🏫</div>
-                <div class="card-title">Escolas</div>
+            <div class="card card-escolas">
+                <div class="card-header">
+                    <a href="/escolas.html" class="card-link">
+                        <div class="card-icon">🏫</div>
+                        <div class="card-title">Escolas</div>
+                    </a>
+                    <button class="btn-card-action" id="btn-nova-escola-dash" onclick="window.location.href='/escola-form.html'" style="display: none;">
+                        + Nova Escola
+                    </button>
+                </div>
                 <div class="card-description">
                     Cadastre e gerencie escolas. Visualize e edite dados cadastrais, 
                     incluindo código INEP, CNPJ e situação.
                 </div>
-            </a>
+            </div>
             
-            <a href="/pareceres.html" class="card card-pareceres">
-                <div class="card-icon">📄</div>
-                <div class="card-title">Pareceres</div>
+            <div class="card card-pareceres">
+                <div class="card-header">
+                    <a href="/pareceres.html" class="card-link">
+                        <div class="card-icon">📄</div>
+                        <div class="card-title">Pareceres</div>
+                    </a>
+                    <button class="btn-card-action" id="btn-novo-parecer-dash" onclick="window.location.href='/parecer-form.html'" style="display: none;">
+                        + Novo Parecer
+                    </button>
+                </div>
                 <div class="card-description">
                     Crie e gerencie pareceres. Gere automaticamente a seção 
                     "ATOS AUTORIZATIVOS" e copie para sua minuta.
                 </div>
-            </a>
+            </div>
             
             <a href="/escolas.html" class="card card-atos">
                 <div class="card-icon">📋</div>
@@ -385,6 +437,18 @@
         if (user.email) {
             document.getElementById('nav-user-name').textContent = user.email;
         }
+        
+        // Verificar permissões e mostrar botões de criação
+        function verificarPermissoes() {
+            const podeEditar = user.perfil === 'edicao';
+            
+            if (podeEditar) {
+                document.getElementById('btn-nova-escola-dash').style.display = 'inline-block';
+                document.getElementById('btn-novo-parecer-dash').style.display = 'inline-block';
+            }
+        }
+        
+        verificarPermissoes();
         
         // Carregar estatísticas
         async function carregarEstatisticas() {
